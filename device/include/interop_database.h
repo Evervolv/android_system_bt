@@ -46,14 +46,9 @@ static const interop_addr_t interop_addr_database[] = {
   {{0xac, 0x9e, 0x17,       0,0,0}, 3, INTEROP_DISABLE_LE_SECURE_CONNECTIONS},
   {{0xf0, 0x79, 0x59,       0,0,0}, 3, INTEROP_DISABLE_LE_SECURE_CONNECTIONS},
 
-  // Polar Heart Rate Monitor
-  {{0x00, 0x22, 0xd0,       0,0,0}, 3, INTEROP_DISABLE_LE_SECURE_CONNECTIONS},
-
   // Motorola Key Link
   {{0x1c, 0x96, 0x5a,       0,0,0}, 3, INTEROP_DISABLE_LE_SECURE_CONNECTIONS},
 
-  // Dialog Keyboard/Mouse
-  {{0x80, 0xea, 0xCa,       0,0,0}, 3, INTEROP_DISABLE_LE_SECURE_CONNECTIONS},
   // Xiaomi Mi Band
   {{0x88, 0x0f, 0x10,       0,0,0}, 3, INTEROP_DISABLE_LE_SECURE_CONNECTIONS},
 
