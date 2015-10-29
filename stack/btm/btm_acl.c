@@ -302,8 +302,8 @@ void btm_acl_created (BD_ADDR bda, DEV_CLASS dc, BD_NAME bdn,
             if (transport == BT_TRANSPORT_BR_EDR)
             {
                 btsnd_hcic_read_rmt_clk_offset (p->hci_handle);
+                btsnd_hcic_rmt_ver_req (p->hci_handle);
             }
-            btsnd_hcic_rmt_ver_req (p->hci_handle);
             p_dev_rec = btm_find_dev_by_handle (hci_handle);
 
 #if (BLE_INCLUDED == TRUE)
@@ -977,15 +977,16 @@ void btm_read_remote_version_complete (UINT8 *p)
     UINT16            handle;
     int               xx;
     BTM_TRACE_DEBUG ("btm_read_remote_version_complete");
-    STREAM_TO_UINT8  (status, p);
-    if (status == HCI_SUCCESS)
-    {
-        STREAM_TO_UINT16 (handle, p);
 
-        /* Look up the connection by handle and copy features */
-        for (xx = 0; xx < MAX_L2CAP_LINKS; xx++, p_acl_cb++)
+    STREAM_TO_UINT8  (status, p);
+    STREAM_TO_UINT16 (handle, p);
+
+    /* Look up the connection by handle and copy features */
+    for (xx = 0; xx < MAX_L2CAP_LINKS; xx++, p_acl_cb++)
+    {
+        if ((p_acl_cb->in_use) && (p_acl_cb->hci_handle == handle))
         {
-            if ((p_acl_cb->in_use) && (p_acl_cb->hci_handle == handle))
+            if (status == HCI_SUCCESS)
             {
                 STREAM_TO_UINT8  (p_acl_cb->lmp_version, p);
                 STREAM_TO_UINT16 (p_acl_cb->manufacturer, p);
@@ -996,8 +997,11 @@ void btm_read_remote_version_complete (UINT8 *p)
                 BTM_TRACE_WARNING ("btm_read_remote_version_complete lmp_version %d manufacturer %d lmp_subversion %d",
                                         p_acl_cb->lmp_version,p_acl_cb->manufacturer, p_acl_cb->lmp_subversion);
                 btm_read_remote_features (p_acl_cb->hci_handle);
-                break;
             }
+
+            if (p_acl_cb->transport == BT_TRANSPORT_LE)
+                l2cble_notify_le_connection (p_acl_cb->remote_addr);
+            break;
         }
     }
 }
