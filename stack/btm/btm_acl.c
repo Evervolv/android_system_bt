@@ -998,9 +998,10 @@ void btm_read_remote_version_complete (UINT8 *p)
                                         p_acl_cb->lmp_version,p_acl_cb->manufacturer, p_acl_cb->lmp_subversion);
                 btm_read_remote_features (p_acl_cb->hci_handle);
             }
-
+#if BLE_INCLUDED == TRUE
             if (p_acl_cb->transport == BT_TRANSPORT_LE)
                 l2cble_notify_le_connection (p_acl_cb->remote_addr);
+#endif
             break;
         }
     }
