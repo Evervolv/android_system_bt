@@ -111,7 +111,7 @@ static void bta_dm_gattc_callback(tBTA_GATTC_EVT event, tBTA_GATTC *p_data);
 extern tBTA_DM_CONTRL_STATE bta_dm_pm_obtain_controller_state(void);
     #endif
 
-#if BLE_VND_INCLUDED == TRUE
+#if ((BLE_VND_INCLUDED == TRUE) && (BLE_INCLUDED == TRUE))
 static void bta_dm_ctrl_features_rd_cmpl_cback(tBTM_STATUS result);
 #endif
 
@@ -370,7 +370,7 @@ static void bta_dm_sys_hw_cback( tBTA_SYS_HW_EVT status )
         BTM_SetDefaultLinkPolicy(bta_dm_cb.cur_policy);
         BTM_RegBusyLevelNotif (bta_dm_bl_change_cback, NULL, BTM_BL_UPDATE_MASK|BTM_BL_ROLE_CHG_MASK);
 
-#if BLE_VND_INCLUDED == TRUE
+#if ((BLE_VND_INCLUDED == TRUE) && (BLE_INCLUDED == TRUE))
         BTM_BleReadControllerFeatures (bta_dm_ctrl_features_rd_cmpl_cback);
 #endif
 
