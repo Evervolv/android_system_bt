@@ -70,7 +70,7 @@
 #define BTE_DID_CONF_FILE "/etc/bluetooth/bt_did.conf"
 #endif
 
-#define VENDOR_PERSISTENCE_PATH    "/persist"
+#define VENDOR_PERSISTENCE_PATH    "/persist/bluetooth"
 #define VENDOR_BT_NV_FILE_NAME     ".bt_nv.bin"
 #define VENDOR_PAYLOAD_MAXLENGTH   (260)
 #define VENDOR_MAX_CMD_HDR_SIZE    (3)
@@ -325,19 +325,6 @@ void btif_thread_post(thread_fn func, void *context) {
     thread_post(bt_jni_workqueue_thread, func, context);
 }
 
-static bool btif_fetch_property(const char *key, bt_bdaddr_t *addr) {
-    char val[PROPERTY_VALUE_MAX] = {0};
-
-    if (property_get(key, val, NULL)) {
-        if (string_to_bdaddr(val, addr)) {
-            BTIF_TRACE_DEBUG("%s: Got BDA %s", __func__, val);
-            return TRUE;
-        }
-        BTIF_TRACE_DEBUG("%s: System Property did not contain valid bdaddr", __func__);
-    }
-    return FALSE;
-}
-
 static bool fetch_vendor_addr (bt_bdaddr_t *local_addr)
 {
     int addr_fd, i;
@@ -393,6 +380,19 @@ static bool fetch_vendor_addr (bt_bdaddr_t *local_addr)
     return status;
 }
 
+static bool btif_fetch_property(const char *key, bt_bdaddr_t *addr) {
+    char val[PROPERTY_VALUE_MAX] = {0};
+
+    if (property_get(key, val, NULL)) {
+        if (string_to_bdaddr(val, addr)) {
+            BTIF_TRACE_DEBUG("%s: Got BDA %s", __func__, val);
+            return TRUE;
+        }
+        BTIF_TRACE_DEBUG("%s: System Property did not contain valid bdaddr", __func__);
+    }
+    return FALSE;
+}
+
 static void btif_fetch_local_bdaddr(bt_bdaddr_t *local_addr)
 {
     char val[PROPERTY_VALUE_MAX] = {0};
@@ -441,6 +441,26 @@ static void btif_fetch_local_bdaddr(bt_bdaddr_t *local_addr)
     /* No BDADDR found in file. Look for BDA in factory property */
     if (!valid_bda) {
         valid_bda = btif_fetch_property(FACTORY_BT_ADDR_PROPERTY, local_addr);
+    }
+
+    /* No factory BDADDR found. Look for BDA in ro.boot.btmacaddr */
+    if ((!valid_bda) && \
+        (property_get("ro.boot.btmacaddr", val, NULL)))
+    {
+        valid_bda = string_to_bdaddr(val, local_addr);
+        if (valid_bda) {
+            BTIF_TRACE_DEBUG("Got vendor BDA %02X:%02X:%02X:%02X:%02X:%02X",
+                local_addr->address[0], local_addr->address[1], local_addr->address[2],
+                local_addr->address[3], local_addr->address[4], local_addr->address[5]);
+        }
+    }
+
+    if (!valid_bda && fetch_vendor_addr(local_addr))
+    {
+        valid_bda = TRUE;
+        BTIF_TRACE_DEBUG("Got Vendor BDA %02X:%02X:%02X:%02X:%02X:%02X",
+            local_addr->address[0], local_addr->address[1], local_addr->address[2],
+            local_addr->address[3], local_addr->address[4], local_addr->address[5]);
     }
 
     /* No factory BDADDR found. Look for BDA in ro.boot.btmacaddr */
