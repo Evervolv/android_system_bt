@@ -346,7 +346,7 @@ static void bta_dm_sys_hw_cback( tBTA_SYS_HW_EVT status )
         memcpy(dev_class, p_bta_dm_cfg->dev_class, sizeof(dev_class));
         BTM_SetDeviceClass (dev_class);
 
-#if (defined BLE_INCLUDED && BLE_INCLUDED == TRUE)
+#if (defined(BLE_INCLUDED) && BLE_INCLUDED == TRUE)
         /* load BLE local information: ID keys, ER if available */
         bta_dm_co_ble_load_local_keys(&key_mask, er, &id_key);
 
@@ -358,7 +358,7 @@ static void bta_dm_sys_hw_cback( tBTA_SYS_HW_EVT status )
         {
             BTM_BleLoadLocalKeys(BTA_BLE_LOCAL_KEY_TYPE_ID, (tBTM_BLE_LOCAL_KEYS *)&id_key);
         }
-#if ((defined BTA_GATT_INCLUDED) && (BTA_GATT_INCLUDED == TRUE))
+#if ((defined (BTA_GATT_INCLUDED) && (BTA_GATT_INCLUDED == TRUE))
         bta_dm_search_cb.conn_id = BTA_GATT_INVALID_CONN_ID;
 #endif
 #endif
@@ -698,6 +698,7 @@ void bta_dm_process_remove_device(BD_ADDR bd_addr)
 void bta_dm_remove_device(tBTA_DM_MSG *p_data)
 {
     tBTA_DM_API_REMOVE_DEVICE *p_dev = &p_data->remove_dev;
+    BOOLEAN continue_delete_other_dev = FALSE;
     if (p_dev == NULL)
         return;
 
@@ -720,9 +721,14 @@ void bta_dm_remove_device(tBTA_DM_MSG *p_data)
         {
             if (!bdcmp(bta_dm_cb.device_list.peer_device[i].peer_bdaddr, p_dev->bd_addr))
             {
+            	UINT8 xport = BT_TRANSPORT_BR_EDR;
+
+#if defined (BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED
+				xport = bta_dm_cb.device_list.peer_device[i].transport
+#endif
                 bta_dm_cb.device_list.peer_device[i].conn_state = BTA_DM_UNPAIRING;
-#if BTA_GATT_INCLUDED == TRUE
-                btm_remove_acl( p_dev->bd_addr, bta_dm_cb.device_list.peer_device[i].transport);
+                btm_remove_acl( p_dev->bd_addr, xport);
+#if defined (BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED
                 APPL_TRACE_DEBUG("%s:transport = %d", __func__,
                                   bta_dm_cb.device_list.peer_device[i].transport);
                 /* save the other transport to check if device is connected on other_transport */
@@ -730,8 +736,9 @@ void bta_dm_remove_device(tBTA_DM_MSG *p_data)
                    other_transport = BT_TRANSPORT_BR_EDR;
                 else
                    other_transport = BT_TRANSPORT_LE;
-                break;
 #endif
+
+                break;
             }
         }
     }
@@ -739,11 +746,9 @@ void bta_dm_remove_device(tBTA_DM_MSG *p_data)
     {
         continue_delete_dev = TRUE;
     }
-
+#if defined (BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED
     // If it is DUMO device and device is paired as different address, unpair that device
     // if different address
-    BOOLEAN continue_delete_other_dev = FALSE;
-#if BTA_GATT_INCLUDED == TRUE
     if ((other_transport && (BTM_ReadConnectedTransportAddress(other_address, other_transport))) ||
       (!other_transport && (BTM_ReadConnectedTransportAddress(other_address, BT_TRANSPORT_INVALID))))
     {
@@ -754,9 +759,7 @@ void bta_dm_remove_device(tBTA_DM_MSG *p_data)
             if (!bdcmp(bta_dm_cb.device_list.peer_device[i].peer_bdaddr, other_address))
             {
                 bta_dm_cb.device_list.peer_device[i].conn_state = BTA_DM_UNPAIRING;
-#if BTA_GATT_INCLUDED == TRUE
                 btm_remove_acl(other_address,bta_dm_cb.device_list.peer_device[i].transport);
-#endif
                 break;
             }
         }
