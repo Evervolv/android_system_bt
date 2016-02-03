@@ -332,7 +332,6 @@ void btm_acl_created (BD_ADDR bda, DEV_CLASS dc, BD_NAME bdn,
             /* if BR/EDR do something more */
             if (transport == BT_TRANSPORT_BR_EDR)
             {
-                btsnd_hcic_read_rmt_clk_offset (p->hci_handle);
                 btsnd_hcic_rmt_ver_req (p->hci_handle);
             }
             p_dev_rec = btm_find_dev_by_handle (hci_handle);
@@ -1027,8 +1026,12 @@ void btm_read_remote_version_complete (UINT8 *p)
                              p_acl_cb->remote_addr[3], p_acl_cb->remote_addr[4], p_acl_cb->remote_addr[5]);
                 BTM_TRACE_WARNING ("btm_read_remote_version_complete lmp_version %d manufacturer %d lmp_subversion %d",
                                         p_acl_cb->lmp_version,p_acl_cb->manufacturer, p_acl_cb->lmp_subversion);
-                btm_read_remote_features (p_acl_cb->hci_handle);
+#if BLE_INCLUDED == TRUE
+                if (p_acl_cb->transport == BT_TRANSPORT_BR_EDR)
+#endif
+                    btm_read_remote_features (p_acl_cb->hci_handle);
             }
+
 #if BLE_INCLUDED == TRUE
             if (p_acl_cb->transport == BT_TRANSPORT_LE)
                 l2cble_notify_le_connection (p_acl_cb->remote_addr);

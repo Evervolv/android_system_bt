@@ -1008,7 +1008,7 @@ void BTA_DmSetBlePrefConnParams(BD_ADDR bd_addr,
 *******************************************************************************/
 void BTA_DmSetBleConnScanParams(UINT32 scan_interval, UINT32 scan_window)
 {
-#if BLE_INCLUDED == TRUE
+#if BTA_GATT_INCLUDED == TRUE
     tBTA_DM_API_BLE_SCAN_PARAMS  *p_msg;
     if ((p_msg = (tBTA_DM_API_BLE_SCAN_PARAMS *)GKI_getbuf(sizeof(tBTA_DM_API_BLE_SCAN_PARAMS))) != NULL)
     {
@@ -1020,7 +1020,7 @@ void BTA_DmSetBleConnScanParams(UINT32 scan_interval, UINT32 scan_window)
     }
 #endif
 }
-#if BLE_INCLUDED == TRUE
+#if BTA_GATT_INCLUDED == TRUE
 /*******************************************************************************
 **
 ** Function         BTA_DmSetBleScanParams
