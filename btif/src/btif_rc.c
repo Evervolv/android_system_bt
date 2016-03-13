@@ -41,6 +41,7 @@
 #include "btif_util.h"
 #include "btif_av.h"
 #include "hardware/bt_rc.h"
+#include "device/include/interop.h"
 #include "uinput.h"
 #include "bdaddr.h"
 
@@ -560,9 +561,13 @@ static BOOLEAN btif_rc_get_connection_state()
 
     for (clients = 0; clients < btif_max_rc_clients; clients++)
     {
-        if (btif_rc_cb[clients].rc_connected == TRUE)
+        if ( (btif_rc_cb[clients].rc_features & BTA_AV_FEAT_ADV_CTRL) &&
+             (btif_rc_cb[clients].rc_features & BTA_AV_FEAT_RCTG))
         {
-            return TRUE;
+            if (btif_rc_cb[clients].rc_connected == TRUE)
+            {
+                return TRUE;
+            }
         }
     }
     return FALSE;
