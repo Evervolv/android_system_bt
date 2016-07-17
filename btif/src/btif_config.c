@@ -28,6 +28,7 @@
 #include "osi/include/allocator.h"
 #include "btcore/include/bdaddr.h"
 #include "btif_common.h"
+#include "btif_api.h"
 #include "btif_config.h"
 #include "btif_config_transcode.h"
 #include "btif_util.h"
@@ -46,7 +47,8 @@ static const period_ms_t CONFIG_SETTLE_PERIOD_MS = 3000;
 
 static void timer_config_save_cb(void *data);
 static void btif_config_write(UINT16 event, char *p_param);
-static void btif_config_devcache_cleanup(void);
+static void btif_config_remove_unpaired(config_t *config);
+static void btif_config_remove_restricted(config_t *config);
 
 // TODO(zachoverflow): Move these two functions out, because they are too specific for this file
 // {grumpy-cat/no, monty-python/you-make-me-sad}
@@ -111,7 +113,11 @@ static future_t *init(void) {
       unlink(LEGACY_CONFIG_FILE_PATH);
   }
 
-  btif_config_devcache_cleanup();
+  btif_config_remove_unpaired(config);
+
+  // Cleanup temporary pairings if we have left guest mode
+  if (!is_restricted_mode())
+    btif_config_remove_restricted(config);
 
   // TODO(sharvil): use a non-wake alarm for this once we have
   // API support for it. There's no need to wake the system to
@@ -360,12 +366,8 @@ void btif_config_flush(void) {
   assert(alarm_timer != NULL);
 
   alarm_cancel(alarm_timer);
-  btif_config_write(0, NULL);
 
   btif_config_write(0, NULL);
-  pthread_mutex_lock(&lock);
-  config_flush(CONFIG_FILE_PATH);
-  pthread_mutex_unlock(&lock);
 }
 
 int btif_config_clear(void){
@@ -399,41 +401,49 @@ static void btif_config_write(UNUSED_ATTR UINT16 event, UNUSED_ATTR char *p_para
   assert(config != NULL);
   assert(alarm_timer != NULL);
 
-  btif_config_devcache_cleanup();
-
   pthread_mutex_lock(&lock);
-  config_save(config, CONFIG_FILE_PATH);
+  config_t *config_paired = config_new_clone(config);
+  btif_config_remove_unpaired(config_paired);
+  config_save(config_paired, CONFIG_FILE_PATH);
+  config_free(config_paired);
   pthread_mutex_unlock(&lock);
 }
 
-static void btif_config_devcache_cleanup(void) {
-  assert(config != NULL);
+static void btif_config_remove_unpaired(config_t *conf) {
+  assert(conf != NULL);
 
-  // The config accumulates cached information about remote
-  // devices during regular inquiry scans. We remove some of these
-  // so the cache doesn't grow indefinitely.
-  // We don't remove information about bonded devices (which have link keys).
-  static const size_t ADDRS_MAX = 512;
-  size_t total_addrs = 0;
+  // The paired config used to carry information about
+  // discovered devices during regular inquiry scans.
+  // We remove these now and cache them in memory instead.
+  const config_section_node_t *snode = config_section_begin(conf);
+  while (snode != config_section_end(conf)) {
+    const char *section = config_section_name(snode);
+    if (string_is_bdaddr(section)) {
+      if (!config_has_key(conf, section, "LinkKey") &&
+          !config_has_key(conf, section, "LE_KEY_PENC") &&
+          !config_has_key(conf, section, "LE_KEY_PID") &&
+          !config_has_key(conf, section, "LE_KEY_PCSRK") &&
+          !config_has_key(conf, section, "LE_KEY_LENC") &&
+          !config_has_key(conf, section, "LE_KEY_LCSRK")) {
+        snode = config_section_next(snode);
+        config_remove_section(conf, section);
+        continue;
+      }
+    }
+    snode = config_section_next(snode);
+  }
+}
+
+static void btif_config_remove_restricted(config_t* config) {
+  assert(config != NULL);
 
   pthread_mutex_lock(&lock);
   const config_section_node_t *snode = config_section_begin(config);
   while (snode != config_section_end(config)) {
     const char *section = config_section_name(snode);
-    if (string_is_bdaddr(section)) {
-      ++total_addrs;
-
-      if ((total_addrs > ADDRS_MAX) &&
-          !config_has_key(config, section, "LinkKey") &&
-          !config_has_key(config, section, "LE_KEY_PENC") &&
-          !config_has_key(config, section, "LE_KEY_PID") &&
-          !config_has_key(config, section, "LE_KEY_PCSRK") &&
-          !config_has_key(config, section, "LE_KEY_LENC") &&
-          !config_has_key(config, section, "LE_KEY_LCSRK")) {
-        snode = config_section_next(snode);
+    if (string_is_bdaddr(section) && config_has_key(config, section, "Restricted")) {
+        BTIF_TRACE_DEBUG("%s: Removing restricted device %s", __func__, section);
         config_remove_section(config, section);
-        continue;
-      }
     }
     snode = config_section_next(snode);
   }
