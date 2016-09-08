@@ -252,7 +252,7 @@ void l2cu_release_lcb (tL2C_LCB *p_lcb)
 
         (*p_cb) (L2CAP_PING_RESULT_NO_LINK);
     }
-
+#if (BLE_INCLUDED == TRUE)
     /* Check and release all the LE COC connections waiting for security */
     if (p_lcb->le_sec_pending_q)
     {
@@ -266,6 +266,7 @@ void l2cu_release_lcb (tL2C_LCB *p_lcb)
         fixed_queue_free(p_lcb->le_sec_pending_q, NULL);
         p_lcb->le_sec_pending_q = NULL;
     }
+#endif
 }
 
 
@@ -1829,6 +1830,7 @@ tL2C_RCB *l2cu_allocate_rcb (UINT16 psm)
 *******************************************************************************/
 tL2C_RCB *l2cu_allocate_ble_rcb (UINT16 psm)
 {
+#if (BLE_INCLUDED == TRUE)
     tL2C_RCB    *p_rcb = &l2cb.ble_rcb_pool[0];
     UINT16      xx;
 
@@ -1844,7 +1846,7 @@ tL2C_RCB *l2cu_allocate_ble_rcb (UINT16 psm)
             return (p_rcb);
         }
     }
-
+#endif
     /* If here, no free RCB found */
     return (NULL);
 }
@@ -1934,6 +1936,7 @@ tL2C_RCB *l2cu_find_rcb_by_psm (UINT16 psm)
 *******************************************************************************/
 tL2C_RCB *l2cu_find_ble_rcb_by_psm (UINT16 psm)
 {
+#if (BLE_INCLUDED == TRUE)
     tL2C_RCB    *p_rcb = &l2cb.ble_rcb_pool[0];
     UINT16      xx;
 
@@ -1942,7 +1945,7 @@ tL2C_RCB *l2cu_find_ble_rcb_by_psm (UINT16 psm)
         if ((p_rcb->in_use) && (p_rcb->psm == psm))
             return (p_rcb);
     }
-
+#endif
     /* If here, no match found */
     return (NULL);
 }

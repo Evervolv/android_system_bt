@@ -233,12 +233,11 @@ static void btif_dm_ble_auth_cmpl_evt (tBTA_DM_AUTH_CMPL *p_auth_cmpl);
 static void btif_dm_ble_passkey_req_evt(tBTA_DM_PIN_REQ *p_pin_req);
 static void btif_dm_ble_key_nc_req_evt(tBTA_DM_SP_KEY_NOTIF *p_notif_req) ;
 static void btif_dm_ble_oob_req_evt(tBTA_DM_SP_RMT_OOB *req_oob_type);
-#endif
-
 static void bte_scan_filt_param_cfg_evt(UINT8 action_type,
                                            tBTA_DM_BLE_PF_AVBL_SPACE avbl_space,
                                            tBTA_DM_BLE_REF_VALUE ref_value,
                                            tBTA_STATUS status);
+#endif
 
 static char* btif_get_default_local_name();
 
@@ -1364,7 +1363,9 @@ static void btif_dm_search_devices_evt (UINT16 event, char *p_param)
                 bt_device_type_t dev_type;
                 uint32_t num_properties = 0;
                 bt_status_t status;
+#if BLE_INCLUDED == TRUE
                 int addr_type = 0;
+#endif
 
                 memset(properties, 0, sizeof(properties));
                 /* BD_ADDR */
@@ -2228,7 +2229,6 @@ static void bta_energy_info_cb(tBTA_DM_BLE_TX_TIME_MS tx_time, tBTA_DM_BLE_RX_TI
     btif_transfer_context(btif_dm_upstreams_evt, BTA_DM_ENER_INFO_READ,
                           (char*) &btif_cb, sizeof(btif_activity_energy_info_cb_t), NULL);
 }
-#endif
 
 /*******************************************************************************
 **
@@ -2255,6 +2255,7 @@ static void bte_scan_filt_param_cfg_evt(UINT8 action_type,
         BTIF_TRACE_DEBUG("%s", __FUNCTION__);
     }
 }
+#endif
 
 /*****************************************************************************
 **
@@ -2275,8 +2276,9 @@ bt_status_t btif_dm_start_discovery(void)
 {
     tBTA_DM_INQ inq_params;
     tBTA_SERVICE_MASK services = 0;
+#if (defined(BLE_INCLUDED) && (BLE_INCLUDED == TRUE))
     tBTA_DM_BLE_PF_FILT_PARAMS adv_filt_param;
-
+#endif
     BTIF_TRACE_EVENT("%s", __FUNCTION__);
 
 #if (defined(BLE_INCLUDED) && (BLE_INCLUDED == TRUE))
@@ -2684,9 +2686,10 @@ bt_status_t btif_dm_get_remote_services_by_transport(bt_bdaddr_t *remote_addr, c
     mask_ext.p_uuid = NULL;
     mask_ext.srvc_mask = BTA_ALL_SERVICE_MASK;
 
+#if ((defined BLE_INCLUDED) && (BLE_INCLUDED == TRUE))
     BTA_DmDiscoverByTransport(remote_addr->address, &mask_ext,
                    bte_dm_search_services_evt, TRUE, transport);
-
+#endif
     return BT_STATUS_SUCCESS;
 }
 
@@ -2918,12 +2921,14 @@ BOOLEAN btif_dm_get_smp_config(tBTE_APPL_CFG* p_cfg) {
 
     char conf[64];
     const char* recv = stack_config_get_interface()->get_pts_smp_options();
+#if ((BLE_INCLUDED == TRUE) && (SMP_INCLUDED == TRUE))
     char* pch;
     char* endptr;
-
+#endif
     strncpy(conf, recv, 64);
     conf[63] = 0; // null terminate
 
+#if ((BLE_INCLUDED == TRUE) && (SMP_INCLUDED == TRUE))
     if ((pch = strtok(conf, ",")) != NULL)
         p_cfg->ble_auth_req = (UINT8) strtoul(pch, &endptr, 16);
     else
@@ -2948,7 +2953,7 @@ BOOLEAN btif_dm_get_smp_config(tBTE_APPL_CFG* p_cfg) {
         p_cfg->ble_max_key_size =  (UINT8) strtoul(pch, &endptr, 16);
     else
         return FALSE;
-
+#endif
     return TRUE;
 }
 
