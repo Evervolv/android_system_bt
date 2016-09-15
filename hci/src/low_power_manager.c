@@ -56,8 +56,8 @@ static void event_allow_device_sleep(void *context);
 static void event_idle_timeout(void *context);
 
 static void reset_state();
-void start_idle_timer(bool check_LPM);
-void stop_idle_timer();
+static void start_idle_timer();
+static void stop_idle_timer();
 
 static thread_fn event_functions[] = {
   event_disable,
@@ -124,7 +124,7 @@ static void transmit_done() {
   transmit_is_done = true;
   if (wake_state == LPM_WAKE_W4_TX_DONE || wake_state == LPM_WAKE_ASSERTED) {
     wake_state = LPM_WAKE_W4_TIMEOUT;
-    start_idle_timer(true);
+    start_idle_timer();
   }
 }
 
@@ -158,7 +158,7 @@ static void allow_device_sleep() {
   if (state == LPM_ENABLED && wake_state == LPM_WAKE_ASSERTED) {
     if (transmit_is_done) {
       wake_state = LPM_WAKE_W4_TIMEOUT;
-      start_idle_timer(true);
+      start_idle_timer();
     } else {
       wake_state = LPM_WAKE_W4_TX_DONE;
     }
@@ -185,8 +185,8 @@ static void idle_timer_expired(UNUSED_ATTR void *context) {
     thread_post(thread, event_idle_timeout, NULL);
 }
 
-void start_idle_timer(bool check_LPM) {
-  if (state == LPM_ENABLED || !check_LPM) {
+static void start_idle_timer() {
+  if (state == LPM_ENABLED) {
     if (idle_timeout_ms == 0) {
        wake_deassert();
     } else {
@@ -195,9 +195,8 @@ void start_idle_timer(bool check_LPM) {
   }
 }
 
-void stop_idle_timer() {
+static void stop_idle_timer() {
   alarm_cancel(idle_alarm);
-  LOG_DEBUG("%s", __func__);
 }
 
 static void event_disable(UNUSED_ATTR void *context) {
@@ -236,9 +235,7 @@ static const low_power_manager_t interface = {
   cleanup,
   post_command,
   wake_assert,
-  transmit_done,
-  start_idle_timer,
-  stop_idle_timer
+  transmit_done
 };
 
 const low_power_manager_t *low_power_manager_get_interface() {
