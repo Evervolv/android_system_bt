@@ -3326,7 +3326,10 @@ void bta_dm_acl_change(tBTA_DM_MSG *p_data)
         conn.link_down.link_type = p_data->acl_change.transport;
 #endif
 
-        if ((p_data->acl_change.transport == BT_TRANSPORT_BR_EDR) &&
+        if (
+#if BLE_INCLUDED == TRUE
+            (p_data->acl_change.transport == BT_TRANSPORT_BR_EDR) &&
+#endif
              bta_dm_search_cb.wait_disc && !bdcmp(bta_dm_search_cb.peer_bdaddr, p_bda))
         {
             bta_dm_search_cb.wait_disc = FALSE;
