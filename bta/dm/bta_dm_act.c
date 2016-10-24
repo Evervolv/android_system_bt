@@ -101,7 +101,7 @@ static void bta_dm_gattc_callback(tBTA_GATTC_EVT event, tBTA_GATTC *p_data);
 extern tBTA_DM_CONTRL_STATE bta_dm_pm_obtain_controller_state(void);
     #endif
 
-#if BLE_VND_INCLUDED == TRUE
+#if ((BLE_VND_INCLUDED == TRUE) && (BLE_INCLUDED == TRUE))
 static void bta_dm_ctrl_features_rd_cmpl_cback(tBTM_STATUS result);
 #endif
 
@@ -433,7 +433,7 @@ static void bta_dm_sys_hw_cback( tBTA_SYS_HW_EVT status )
         BTM_SetDefaultLinkPolicy(bta_dm_cb.cur_policy);
         BTM_RegBusyLevelNotif (bta_dm_bl_change_cback, NULL, BTM_BL_UPDATE_MASK|BTM_BL_ROLE_CHG_MASK);
 
-#if BLE_VND_INCLUDED == TRUE
+#if ((BLE_VND_INCLUDED == TRUE) && (BLE_INCLUDED == TRUE))
         BTM_BleReadControllerFeatures (bta_dm_ctrl_features_rd_cmpl_cback);
 #endif
 
@@ -755,14 +755,13 @@ void bta_dm_remove_device(tBTA_DM_MSG *p_data)
         {
             if (!bdcmp(bta_dm_cb.device_list.peer_device[i].peer_bdaddr, p_dev->bd_addr))
             {
-                UINT8 transport = BT_TRANSPORT_BR_EDR;
-
 #if (defined(BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED)
+                UINT8 transport = BT_TRANSPORT_BR_EDR;
                 transport = bta_dm_cb.device_list.peer_device[i].transport;
 #endif  // (defined(BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED)
                 bta_dm_cb.device_list.peer_device[i].conn_state = BTA_DM_UNPAIRING;
-                btm_remove_acl(p_dev->bd_addr, transport);
 #if (defined(BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED)
+                btm_remove_acl(p_dev->bd_addr, transport);
                 APPL_TRACE_DEBUG("%s:transport = %d", __func__,
                                   bta_dm_cb.device_list.peer_device[i].transport);
 
@@ -771,9 +770,10 @@ void bta_dm_remove_device(tBTA_DM_MSG *p_data)
                    other_transport = BT_TRANSPORT_BR_EDR;
                 else
                    other_transport = BT_TRANSPORT_LE;
-#endif  // (defined(BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED)
 
                 break;
+
+#endif  // (defined(BTA_GATT_INCLUDED) && BTA_GATT_INCLUDED)
             }
         }
     }
