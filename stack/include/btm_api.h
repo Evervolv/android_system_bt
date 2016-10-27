@@ -848,8 +848,7 @@ typedef struct
 typedef struct
 {
     tBTM_BL_EVENT   event;  /* The event reported. */
-    UINT8           busy_level;/* when paging or inquiring, level is between
-                                  17 to 21 as the max links can be 16.
+    UINT8           busy_level;/* when paging or inquiring, level is 10.
                                 * Otherwise, the number of ACL links. */
     UINT8           busy_level_flags; /* Notifies actual inquiry/page activities */
 } tBTM_BL_UPDATE_DATA;
