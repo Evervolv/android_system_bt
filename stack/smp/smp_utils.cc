@@ -23,8 +23,10 @@
  ******************************************************************************/
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
 #include <ctype.h>
 #include <string.h>
+
 #include "bt_types.h"
 #include "bt_utils.h"
 #include "btm_ble_api.h"
@@ -1530,3 +1532,7 @@ bool smp_request_oob_data(tSMP_CB* p_cb) {
 
   return true;
 }
+
+
+#endif
+

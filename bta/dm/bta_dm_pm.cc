@@ -1147,6 +1147,7 @@ static void bta_dm_pm_set_sniff_policy(tBTA_DM_PEER_DEVICE* p_dev,
   BTM_SetLinkPolicy(p_dev->peer_bdaddr, &policy_setting);
 }
 
+#if (BLE_DISABLED == FALSE)
 /*******************************************************************************
  *
  * Function         bta_dm_pm_obtain_controller_state
@@ -1168,3 +1169,4 @@ tBTA_DM_CONTRL_STATE bta_dm_pm_obtain_controller_state(void) {
   APPL_TRACE_DEBUG("bta_dm_pm_obtain_controller_state: %d", cur_state);
   return cur_state;
 }
+#endif

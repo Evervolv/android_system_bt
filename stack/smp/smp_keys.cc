@@ -23,6 +23,7 @@
  ******************************************************************************/
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
 #if (SMP_DEBUG == TRUE)
 #include <stdio.h>
 #endif
@@ -1922,3 +1923,6 @@ void smp_start_nonce_generation(tSMP_CB* p_cb) {
       },
       p_cb));
 }
+
+#endif
+

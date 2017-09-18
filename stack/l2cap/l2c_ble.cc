@@ -34,6 +34,7 @@
 #include "osi/include/osi.h"
 #include "stack_config.h"
 
+#if (BLE_DISABLED == FALSE)
 extern fixed_queue_t* btu_general_alarm_queue;
 
 static void l2cble_start_conn_update(tL2C_LCB* p_lcb);
@@ -1432,3 +1433,4 @@ bool l2ble_sec_access_req(BD_ADDR bd_addr, uint16_t psm, bool is_originator,
 
   return status;
 }
+#endif /* (BLE_DISABLED == FALSE) */

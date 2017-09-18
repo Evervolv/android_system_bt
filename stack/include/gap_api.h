@@ -336,6 +336,7 @@ extern uint8_t GAP_SetTraceLevel(uint8_t new_level);
  ******************************************************************************/
 extern void GAP_Init(void);
 
+#if (BLE_DISABLED == FALSE)
 /*******************************************************************************
  *
  * Function         GAP_BleAttrDBUpdate
@@ -395,5 +396,7 @@ extern bool GAP_BleReadPeerAddressResolutionCap(BD_ADDR peer_bda,
  *
  ******************************************************************************/
 extern bool GAP_BleCancelReadPeerDevName(BD_ADDR peer_bda);
+
+#endif
 
 #endif /* GAP_API_H */

@@ -616,6 +616,7 @@ typedef struct /* contains the parameters passed to the inquiry functions */
 #define BTM_INQ_RESULT_BR 0x01
 #define BTM_INQ_RESULT_BLE 0x02
 
+#if (BLE_DISABLED == FALSE)
 constexpr uint8_t BLE_EVT_CONNECTABLE_BIT = 0;
 constexpr uint8_t BLE_EVT_SCANNABLE_BIT = 1;
 constexpr uint8_t BLE_EVT_DIRECTED_BIT = 2;
@@ -629,6 +630,7 @@ constexpr uint8_t PHY_LE_CODED = 0x03;
 
 constexpr uint8_t NO_ADI_PRESENT = 0xFF;
 constexpr uint8_t TX_POWER_NOT_PRESENT = 0x7F;
+#endif
 
 /* These are the fields returned in each device's response to the inquiry.  It
  * is returned in the results callback if registered.
@@ -644,6 +646,7 @@ typedef struct {
   uint32_t eir_uuid[BTM_EIR_SERVICE_ARRAY_SIZE];
   bool eir_complete_list;
   tBT_DEVICE_TYPE device_type;
+#if (BLE_DISABLED == FALSE)
   uint8_t inq_result_type;
   uint8_t ble_addr_type;
   uint16_t ble_evt_type;
@@ -653,6 +656,7 @@ typedef struct {
   int8_t ble_tx_power;
   uint16_t ble_periodic_adv_int;
   uint8_t flag;
+#endif
 } tBTM_INQ_RESULTS;
 
 /* This is the inquiry response information held in its database by BTM, and
@@ -668,10 +672,12 @@ typedef struct {
                                remote name request is
                                required to be done. Having the flag here avoid
                                duplicate store of inquiry results */
+#if (BLE_DISABLED == FALSE)
   uint16_t remote_name_len;
   tBTM_BD_NAME remote_name;
   uint8_t remote_name_state;
   uint8_t remote_name_type;
+#endif
 
 } tBTM_INQ_INFO;
 
@@ -833,16 +839,20 @@ typedef struct {
   BD_NAME_PTR p_bdn;       /* The device name */
   uint8_t* p_features;     /* pointer to the remote device's features page[0]
                               (supported features page) */
+#if (BLE_DISABLED == FALSE)
   uint16_t handle;         /* connection handle */
   tBT_TRANSPORT transport; /* link is LE or not */
+#endif
 } tBTM_BL_CONN_DATA;
 
 /* the data type associated with BTM_BL_DISCN_EVT */
 typedef struct {
   tBTM_BL_EVENT event;     /* The event reported. */
   BD_ADDR_PTR p_bda;       /* The address of the disconnected device */
+#if (BLE_DISABLED == FALSE)
   uint16_t handle;         /* disconnected connection handle */
   tBT_TRANSPORT transport; /* link is LE link or not */
+#endif
 } tBTM_BL_DISCN_DATA;
 
 /* Busy-Level shall have the inquiry_paging mask set when
@@ -890,10 +900,16 @@ typedef void(tBTM_BL_CHANGE_CB)(tBTM_BL_EVENT_DATA* p_data);
  * changes. First param is BD address, second is if added or removed.
  * Registered through BTM_AclRegisterForChanges call.
 */
+#if (BLE_DISABLED == FALSE)
 typedef void(tBTM_ACL_DB_CHANGE_CB)(BD_ADDR p_bda, DEV_CLASS p_dc,
                                     BD_NAME p_bdn, uint8_t* features,
                                     bool is_new, uint16_t handle,
                                     tBT_TRANSPORT transport);
+#else
+typedef void (tBTM_ACL_DB_CHANGE_CB) (BD_ADDR p_bda, DEV_CLASS p_dc,
+                                      BD_NAME p_bdn, uint8_t *features,
+                                      bool is_new);
+#endif
 /*****************************************************************************
  *  SCO CHANNEL MANAGEMENT
  ****************************************************************************/
@@ -1361,8 +1377,12 @@ typedef uint8_t tBTM_SP_EVT;
 #define BTM_IO_CAP_IO 1     /* DisplayYesNo */
 #define BTM_IO_CAP_IN 2     /* KeyboardOnly */
 #define BTM_IO_CAP_NONE 3   /* NoInputNoOutput */
+#if (BLE_DISABLED == FALSE)
 #define BTM_IO_CAP_KBDISP 4 /* Keyboard display */
 #define BTM_IO_CAP_MAX 5
+#else
+#define BTM_IO_CAP_MAX      4
+#endif
 #define BTM_IO_CAP_UNKNOWN 0xFF /* Unknown value */
 
 typedef uint8_t tBTM_IO_CAP;
@@ -1611,6 +1631,7 @@ typedef struct {
   tBTM_LE_KEY_TYPE resp_keys; /* keys to be distributed, bit mask */
 } tBTM_LE_IO_REQ;
 
+#if (BLE_DISABLED == FALSE)
 /* data type for tBTM_LE_COMPLT */
 typedef struct {
   uint8_t reason;
@@ -1618,6 +1639,7 @@ typedef struct {
   bool is_pair_cancel;
   bool smp_over_br;
 } tBTM_LE_COMPLT;
+#endif
 
 /* BLE encryption keys */
 typedef struct {
@@ -1678,8 +1700,10 @@ typedef union {
                          /* no callback data for
                           * BTM_LE_KEY_REQ_EVT
                           * and BTM_LE_OOB_REQ_EVT  */
+#if (BLE_DISABLED == FALSE)
   tBTM_LE_COMPLT complt; /* BTM_LE_COMPLT_EVT      */
   tSMP_OOB_DATA_TYPE req_oob_type;
+#endif
   tBTM_LE_KEY key;
 } tBTM_LE_EVT_DATA;
 
@@ -1721,8 +1745,10 @@ typedef struct {
   tBTM_AUTH_COMPLETE_CALLBACK* p_auth_complete_callback;
   tBTM_BOND_CANCEL_CMPL_CALLBACK* p_bond_cancel_cmpl_callback;
   tBTM_SP_CALLBACK* p_sp_callback;
+#if (BLE_DISABLED == FALSE)
   tBTM_LE_CALLBACK* p_le_callback;
   tBTM_LE_KEY_CALLBACK* p_le_key_callback;
+#endif
 } tBTM_APPL_INFO;
 
 /* Callback function for when a link supervision timeout event occurs.

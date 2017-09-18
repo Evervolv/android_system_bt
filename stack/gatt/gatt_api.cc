@@ -24,6 +24,9 @@
 #include "bt_target.h"
 
 #include <base/bind.h>
+
+#if (BLE_DISABLED == FALSE)
+
 #include <stdio.h>
 #include <string.h>
 #include "bt_common.h"
@@ -1477,3 +1480,6 @@ bool GATT_GetConnIdIfConnected(tGATT_IF gatt_if, BD_ADDR bd_addr,
   GATT_TRACE_API("GATT_GetConnIdIfConnected status=%d", status);
   return status;
 }
+
+#endif
+

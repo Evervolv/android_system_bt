@@ -72,9 +72,12 @@ extern void avdt_rcv_sync_info(BT_HDR* p_buf); /* this is for hci_test */
 #endif
 
 #include "bta_sys.h"
-#include "btm_ble_int.h"
+
+#if (BLE_DISABLED == FALSE)
 #include "gatt_int.h"
 #include "smp_int.h"
+#include "btm_ble_int.h"
+#endif
 
 /* Define BTU storage area
 */

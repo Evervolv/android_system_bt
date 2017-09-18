@@ -25,6 +25,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 #include "bt_common.h"
 #include "bta_gatts_co.h"
@@ -681,3 +683,4 @@ static void bta_gatts_cong_cback(uint16_t conn_id, bool congested) {
     }
   }
 }
+#endif /* BLE_DISABLED */

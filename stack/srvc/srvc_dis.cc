@@ -27,7 +27,7 @@
 #include "osi/include/osi.h"
 #include "srvc_dis_int.h"
 #include "srvc_eng_int.h"
-
+#if (BLE_DISABLED == FALSE)
 #define DIS_MAX_NUM_INC_SVR 0
 #define DIS_MAX_CHAR_NUM 9
 #define DIS_MAX_ATTR_NUM (DIS_MAX_CHAR_NUM * 2 + DIS_MAX_NUM_INC_SVR + 1)
@@ -474,3 +474,5 @@ bool DIS_ReadDISInfo(BD_ADDR peer_bda, tDIS_READ_CBACK* p_cback,
 
   return dis_gatt_c_read_dis_req(conn_id);
 }
+#endif  /* BLE_DISABLED */
+

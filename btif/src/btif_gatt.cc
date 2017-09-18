@@ -36,6 +36,8 @@
 #include "btif_common.h"
 #include "btif_util.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include "bta_api.h"
 #include "bta_gatt_api.h"
 #include "btif_gatt.h"
@@ -103,3 +105,5 @@ const btgatt_interface_t* btif_gatt_get_interface() {
   btgattInterface.advertiser = get_ble_advertiser_instance();
   return &btgattInterface;
 }
+
+#endif

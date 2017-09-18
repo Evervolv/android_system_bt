@@ -44,6 +44,9 @@
 #include "osi/include/osi.h"
 
 #include "advertise_data_parser.h"
+
+#if (BLE_DISABLED == FALSE)
+
 #include "btm_ble_int.h"
 #include "gatt_int.h"
 #include "gattdefs.h"
@@ -608,8 +611,7 @@ static void btm_ble_vendor_capability_vsc_cmpl_cback(
       btm_cb.cmn_ble_vsc_cb.adv_inst_max, btm_cb.cmn_ble_vsc_cb.rpa_offloading,
       btm_cb.cmn_ble_vsc_cb.energy_support,
       btm_cb.cmn_ble_vsc_cb.extended_scan_support);
-
-  btm_ble_adv_init();
+      btm_ble_adv_init();
 
   if (btm_cb.cmn_ble_vsc_cb.max_filter > 0) btm_ble_adv_filter_init();
 
@@ -1331,7 +1333,6 @@ tBTM_STATUS btm_ble_set_discoverability(uint16_t combined_mode) {
   }
   return status;
 }
-
 /*******************************************************************************
  *
  * Function         btm_ble_set_connectability
@@ -1409,7 +1410,6 @@ tBTM_STATUS btm_ble_set_connectability(uint16_t combined_mode) {
   }
   return status;
 }
-
 void btm_send_hci_scan_enable(uint8_t enable, uint8_t filter_duplicates) {
   if (controller_get_interface()->supports_ble_extended_advertising()) {
     btsnd_hcic_ble_set_extended_scan_enable(enable, filter_duplicates, 0x0000,
@@ -2669,12 +2669,10 @@ void btm_ble_update_mode_operation(uint8_t link_role, BD_ADDR bd_addr,
     /* clear all adv states */
     btm_ble_clear_topology_mask(BTM_BLE_STATE_ALL_ADV_MASK);
   }
-
   if (btm_cb.ble_ctr_cb.inq_var.connectable_mode == BTM_BLE_CONNECTABLE) {
     btm_ble_set_connectability(btm_cb.btm_inq_vars.connectable_mode |
                                btm_cb.ble_ctr_cb.inq_var.connectable_mode);
   }
-
   /* when no connection is attempted, and controller is not rejecting last
      request
      due to resource limitation, start next direct connection or background
@@ -2799,3 +2797,5 @@ bool btm_ble_topology_check(tBTM_BLE_STATE_MASK request_state_mask) {
   }
   return rt;
 }
+
+#endif  /* BLE_DISABLED */

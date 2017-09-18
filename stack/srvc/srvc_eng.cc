@@ -23,6 +23,8 @@
 #include "osi/include/osi.h"
 #include "srvc_eng_int.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include "srvc_battery_int.h"
 #include "srvc_dis_int.h"
 
@@ -438,3 +440,4 @@ void srvc_sr_notify(BD_ADDR remote_bda, uint16_t handle, uint16_t len,
     GATTS_HandleValueNotification(conn_id, handle, len, p_value);
   }
 }
+#endif

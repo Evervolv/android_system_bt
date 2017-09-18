@@ -121,9 +121,11 @@ typedef struct {
   uint8_t timeout_retries;
   uint8_t is_local_initiated;
   uint8_t sdp_attempts;
+#if (BLE_DISABLED == FALSE)
   bool is_le_only;
   bool is_le_nc; /* LE Numeric comparison */
   btif_dm_ble_cb_t ble;
+#endif
 } btif_dm_pairing_cb_t;
 
 typedef struct {
@@ -221,6 +223,7 @@ static void btif_dm_cb_hid_remote_name(tBTM_REMOTE_DEV_NAME* p_remote_name);
 static void btif_update_remote_properties(BD_ADDR bd_addr, BD_NAME bd_name,
                                           DEV_CLASS dev_class,
                                           tBT_DEVICE_TYPE dev_type);
+#if (BLE_DISABLED == FALSE)
 static btif_dm_local_key_cb_t ble_local_key_cb;
 static void btif_dm_ble_key_notif_evt(tBTA_DM_SP_KEY_NOTIF* p_ssp_key_notif);
 static void btif_dm_ble_auth_cmpl_evt(tBTA_DM_AUTH_CMPL* p_auth_cmpl);
@@ -228,10 +231,9 @@ static void btif_dm_ble_passkey_req_evt(tBTA_DM_PIN_REQ* p_pin_req);
 static void btif_dm_ble_key_nc_req_evt(tBTA_DM_SP_KEY_NOTIF* p_notif_req);
 static void btif_dm_ble_oob_req_evt(tBTA_DM_SP_RMT_OOB* req_oob_type);
 static void btif_dm_ble_sc_oob_req_evt(tBTA_DM_SP_RMT_OOB* req_oob_type);
-
 static void bte_scan_filt_param_cfg_evt(uint8_t action_type, uint8_t avbl_space,
                                         uint8_t ref_value, uint8_t status);
-
+#endif
 static char* btif_get_default_local_name();
 
 static void btif_stats_add_bond_event(const bt_bdaddr_t* bd_addr,
@@ -665,6 +667,7 @@ static void btif_dm_cb_create_bond(bt_bdaddr_t* bd_addr,
   bool is_hid = check_cod(bd_addr, COD_HID_POINTING);
   bond_state_changed(BT_STATUS_SUCCESS, bd_addr, BT_BOND_STATE_BONDING);
 
+#if (BLE_DISABLED == FALSE)
   int device_type;
   int addr_type;
   bdstr_t bdstr;
@@ -693,7 +696,11 @@ static void btif_dm_cb_create_bond(bt_bdaddr_t* bd_addr,
     BTA_DmAddBleDevice(bd_addr->address, addr_type, device_type);
   }
 
-  if (is_hid && (device_type & BT_DEVICE_TYPE_BLE) == 0) {
+  if (is_hid && (device_type & BT_DEVICE_TYPE_BLE) == 0)
+#else
+  if (is_hid)
+#endif
+  {
     bt_status_t status;
     status = (bt_status_t)btif_hh_connect(bd_addr);
     if (status != BT_STATUS_SUCCESS)
@@ -1074,8 +1081,11 @@ static void btif_dm_auth_cmpl_evt(tBTA_DM_AUTH_CMPL* p_auth_cmpl) {
   // derivation to allow bond state change notification for the BR/EDR transport
   // so that the subsequent BR/EDR connections to the remote can use the derived
   // link key.
-  if ((bdcmp(p_auth_cmpl->bd_addr, pairing_cb.bd_addr) != 0) &&
-      (!pairing_cb.ble.is_penc_key_rcvd)) {
+  if ((bdcmp(p_auth_cmpl->bd_addr, pairing_cb.bd_addr) != 0)
+#if (BLE_DISABLED == FALSE)
+		&& (!pairing_cb.ble.is_penc_key_rcvd)
+#endif
+		) {
     char address[32];
     bt_bdaddr_t bt_bdaddr;
 
@@ -1089,7 +1099,9 @@ static void btif_dm_auth_cmpl_evt(tBTA_DM_AUTH_CMPL* p_auth_cmpl) {
 
   // Skip SDP for certain  HID Devices
   if (p_auth_cmpl->success) {
+#if (BLE_DISABLED == FALSE)
     btif_storage_set_remote_addr_type(&bd_addr, p_auth_cmpl->addr_type);
+#endif
     btif_update_remote_properties(p_auth_cmpl->bd_addr, p_auth_cmpl->bd_name,
                                   NULL, p_auth_cmpl->dev_type);
     pairing_cb.timeout_retries = 0;
@@ -1120,6 +1132,7 @@ static void btif_dm_auth_cmpl_evt(tBTA_DM_AUTH_CMPL* p_auth_cmpl) {
       HAL_CBACK(bt_hal_cbacks, remote_device_properties_cb, BT_STATUS_SUCCESS,
                 &bd_addr, 1, &prop);
     } else {
+#if (BLE_DISABLED == FALSE)
       bool is_crosskey = false;
       /* If bonded due to cross-key, save the static address too*/
       if (pairing_cb.state == BT_BOND_STATE_BONDING &&
@@ -1132,13 +1145,17 @@ static void btif_dm_auth_cmpl_evt(tBTA_DM_AUTH_CMPL* p_auth_cmpl) {
       }
       if (!is_crosskey ||
           !(stack_config_get_interface()->get_pts_crosskey_sdp_disable())) {
+#endif
+
         // Ensure inquiry is stopped before attempting service discovery
         btif_dm_cancel_discovery();
 
         /* Trigger SDP on the device */
         pairing_cb.sdp_attempts = 1;
         btif_dm_get_remote_services(&bd_addr);
+#if (BLE_DISABLED == FALSE)
       }
+#endif
     }
     // Do not call bond_state_changed_cb yet. Wait until remote service
     // discovery is complete
@@ -1254,7 +1271,11 @@ static void btif_dm_search_devices_evt(uint16_t event, char* p_param) {
 
       BTIF_TRACE_DEBUG("%s() %s device_type = 0x%x\n", __func__,
                        bdaddr_to_string(&bdaddr, bdstr, sizeof(bdstr)),
+#if (BLE_DISABLED == FALSE)
                        p_search_data->inq_res.device_type);
+#else
+                       BT_DEVICE_TYPE_BREDR);
+#endif
       bdname.name[0] = 0;
 
       if (!check_eir_remote_name(p_search_data, bdname.name, &remote_name_len))
@@ -1275,8 +1296,9 @@ static void btif_dm_search_devices_evt(uint16_t event, char* p_param) {
         bt_device_type_t dev_type;
         uint32_t num_properties = 0;
         bt_status_t status;
+#if (BLE_DISABLED == FALSE)
         int addr_type = 0;
-
+#endif
         memset(properties, 0, sizeof(properties));
         /* BD_ADDR */
         BTIF_STORAGE_FILL_PROPERTY(&properties[num_properties],
@@ -1302,6 +1324,7 @@ static void btif_dm_search_devices_evt(uint16_t event, char* p_param) {
         }
 
         /* DEV_TYPE */
+#if (BLE_DISABLED == FALSE)
         /* FixMe: Assumption is that bluetooth.h and BTE enums match */
 
         /* Verify if the device is dual mode in NVRAM */
@@ -1318,6 +1341,9 @@ static void btif_dm_search_devices_evt(uint16_t event, char* p_param) {
 
         if (p_search_data->inq_res.device_type == BT_DEVICE_TYPE_BLE)
           addr_type = p_search_data->inq_res.ble_addr_type;
+#else
+        dev_type = (bt_device_type_t)BT_DEVICE_TYPE_BREDR;
+#endif
         BTIF_STORAGE_FILL_PROPERTY(&properties[num_properties],
                                    BT_PROPERTY_TYPE_OF_DEVICE, sizeof(dev_type),
                                    &dev_type);
@@ -1332,19 +1358,23 @@ static void btif_dm_search_devices_evt(uint16_t event, char* p_param) {
             btif_storage_add_remote_device(&bdaddr, num_properties, properties);
         ASSERTC(status == BT_STATUS_SUCCESS,
                 "failed to save remote device (inquiry)", status);
+#if (BLE_DISABLED == FALSE)
         status = btif_storage_set_remote_addr_type(&bdaddr, addr_type);
         ASSERTC(status == BT_STATUS_SUCCESS,
                 "failed to save remote addr type (inquiry)", status);
+#endif
         /* Callback to notify upper layer of device */
         HAL_CBACK(bt_hal_cbacks, device_found_cb, num_properties, properties);
       }
     } break;
 
     case BTA_DM_INQ_CMPL_EVT: {
+#if (BLE_DISABLED == FALSE)
       do_in_bta_thread(
           FROM_HERE,
           base::Bind(&BTM_BleAdvFilterParamSetup, BTM_BLE_SCAN_COND_DELETE, 0,
                      nullptr, base::Bind(&bte_scan_filt_param_cfg_evt, 0)));
+#endif
     } break;
     case BTA_DM_DISC_CMPL_EVT: {
       HAL_CBACK(bt_hal_cbacks, discovery_state_changed_cb,
@@ -1361,12 +1391,14 @@ static void btif_dm_search_devices_evt(uint16_t event, char* p_param) {
        *
        */
       if (btif_dm_inquiry_in_progress == false) {
+#if (BLE_DISABLED == FALSE)
         btgatt_filt_param_setup_t adv_filt_param;
         memset(&adv_filt_param, 0, sizeof(btgatt_filt_param_setup_t));
         do_in_bta_thread(
             FROM_HERE,
             base::Bind(&BTM_BleAdvFilterParamSetup, BTM_BLE_SCAN_COND_DELETE, 0,
                        nullptr, base::Bind(&bte_scan_filt_param_cfg_evt, 0)));
+#endif
         HAL_CBACK(bt_hal_cbacks, discovery_state_changed_cb,
                   BT_DISCOVERY_STOPPED);
       }
@@ -1464,6 +1496,7 @@ static void btif_dm_search_services_evt(uint16_t event, char* p_param) {
       /* no-op */
       break;
 
+#if (BLE_DISABLED == FALSE)
     case BTA_DM_DISC_BLE_RES_EVT: {
       BTIF_TRACE_DEBUG("%s:, services 0x%x)", __func__,
                        p_data->disc_ble_res.service.uu.uuid16);
@@ -1521,6 +1554,7 @@ static void btif_dm_search_services_evt(uint16_t event, char* p_param) {
                   &bd_addr, num_properties, prop);
       }
     } break;
+#endif /* BLE_DISABLED */
 
     default: { ASSERTC(0, "unhandled search services event", event); } break;
   }
@@ -1608,8 +1642,10 @@ static void btif_dm_upstreams_evt(uint16_t event, char* p_param) {
         BTA_DmSetDeviceName(btif_get_default_local_name());
       }
 
+#if (BLE_DISABLED == FALSE)
       /* Enable local privacy */
       BTA_DmBleConfigLocalPrivacy(BLE_LOCAL_PRIVACY_ENABLED);
+#endif
 
       /* for each of the enabled services in the mask, trigger the profile
        * enable */
@@ -1729,6 +1765,7 @@ static void btif_dm_upstreams_evt(uint16_t event, char* p_param) {
       kill(getpid(), SIGKILL);
       break;
 
+#if (BLE_DISABLED == FALSE)
     case BTA_DM_BLE_KEY_EVT:
       BTIF_TRACE_DEBUG("BTA_DM_BLE_KEY_EVT key_type=0x%02x ",
                        p_data->ble_key.key_type);
@@ -1915,6 +1952,7 @@ static void btif_dm_upstreams_evt(uint16_t event, char* p_param) {
       osi_free(data);
       break;
     }
+#endif
 
     case BTA_DM_AUTHORIZE_EVT:
     case BTA_DM_SIG_STRENGTH_EVT:
@@ -2097,6 +2135,7 @@ static void bte_dm_remote_service_record_evt(tBTA_DM_SEARCH_EVT event,
                         sizeof(tBTA_DM_SEARCH), NULL);
 }
 
+#if (BLE_DISABLED == FALSE)
 /*******************************************************************************
  *
  * Function         bta_energy_info_cb
@@ -2141,7 +2180,7 @@ static void bte_scan_filt_param_cfg_evt(uint8_t ref_value, uint8_t avbl_space,
     BTIF_TRACE_DEBUG("%s", __func__);
   }
 }
-
+#endif
 /*****************************************************************************
  *
  *   btif api functions (no context switch)
@@ -2163,6 +2202,7 @@ bt_status_t btif_dm_start_discovery(void) {
 
   BTIF_TRACE_EVENT("%s", __func__);
 
+#if (BLE_DISABLED == FALSE)
   /* Cleanup anything remaining on index 0 */
   do_in_bta_thread(
       FROM_HERE,
@@ -2191,6 +2231,9 @@ bt_status_t btif_dm_start_discovery(void) {
   inq_params.intl_duration[1] = BTIF_DM_INTERLEAVE_DURATION_LE_ONE;
   inq_params.intl_duration[2] = BTIF_DM_INTERLEAVE_DURATION_BR_TWO;
   inq_params.intl_duration[3] = BTIF_DM_INTERLEAVE_DURATION_LE_TWO;
+#endif
+#else
+  inq_params.mode = BTA_DM_GENERAL_INQUIRY;
 #endif
   inq_params.duration = BTIF_DM_DEFAULT_INQ_MAX_DURATION;
 
@@ -2267,7 +2310,7 @@ bt_status_t btif_dm_create_bond_out_of_band(
     const bt_out_of_band_data_t* oob_data) {
   bdcpy(oob_cb.bdaddr, bd_addr->address);
   memcpy(&oob_cb.oob_data, oob_data, sizeof(bt_out_of_band_data_t));
-
+#if (BLE_DISABLED == FALSE)
   uint8_t empty[] = {0, 0, 0, 0, 0, 0, 0};
   // If LE Bluetooth Device Address is provided, use provided address type
   // value.
@@ -2281,7 +2324,7 @@ bt_status_t btif_dm_create_bond_out_of_band(
                           address_type);
     }
   }
-
+#endif
   bdstr_t bdstr;
   BTIF_TRACE_EVENT("%s: bd_addr=%s, transport=%d", __func__,
                    bdaddr_to_string(bd_addr, bdstr, sizeof(bdstr)), transport);
@@ -2312,6 +2355,8 @@ bt_status_t btif_dm_cancel_bond(const bt_bdaddr_t* bd_addr) {
   **  2. special handling for HID devices
   */
   if (pairing_cb.state == BT_BOND_STATE_BONDING) {
+#if (BLE_DISABLED == FALSE)
+
     if (pairing_cb.is_ssp) {
       if (pairing_cb.is_le_only) {
         BTA_DmBleSecurityGrant((uint8_t*)bd_addr->address,
@@ -2330,6 +2375,17 @@ bt_status_t btif_dm_cancel_bond(const bt_bdaddr_t* bd_addr) {
       /* Cancel bonding, in case it is in ACL connection setup state */
       BTA_DmBondCancel((uint8_t*)bd_addr->address);
     }
+
+#else
+    if (pairing_cb.is_ssp) {
+      BTA_DmConfirm((uint8_t*)bd_addr->address, false);
+    } else {
+      BTA_DmPinReply((uint8_t*)bd_addr->address, false, 0, NULL);
+    }
+    /* Cancel bonding, in case it is in ACL connection setup state */
+    BTA_DmBondCancel((uint8_t*)bd_addr->address);
+    btif_storage_remove_bonded_device((bt_bdaddr_t*)bd_addr);
+#endif
   }
 
   return BT_STATUS_SUCCESS;
@@ -2392,6 +2448,8 @@ bt_status_t btif_dm_pin_reply(const bt_bdaddr_t* bd_addr, uint8_t accept,
                               uint8_t pin_len, bt_pin_code_t* pin_code) {
   BTIF_TRACE_EVENT("%s: accept=%d", __func__, accept);
   if (pin_code == NULL || pin_len > PIN_CODE_LEN) return BT_STATUS_FAIL;
+#if (BLE_DISABLED == FALSE)
+
   if (pairing_cb.is_le_only) {
     int i;
     uint32_t passkey = 0;
@@ -2408,6 +2466,11 @@ bt_status_t btif_dm_pin_reply(const bt_bdaddr_t* bd_addr, uint8_t accept,
     BTA_DmPinReply((uint8_t*)bd_addr->address, accept, pin_len, pin_code->pin);
     if (accept) pairing_cb.pin_code_len = pin_len;
   }
+#else
+  BTA_DmPinReply((uint8_t*)bd_addr->address, accept, pin_len, pin_code->pin);
+
+  if (accept) pairing_cb.pin_code_len = pin_len;
+#endif
   return BT_STATUS_SUCCESS;
 }
 
@@ -2433,6 +2496,7 @@ bt_status_t btif_dm_ssp_reply(const bt_bdaddr_t* bd_addr,
   }
   /* BT_SSP_VARIANT_CONSENT & BT_SSP_VARIANT_PASSKEY_CONFIRMATION supported */
   BTIF_TRACE_EVENT("%s: accept=%d", __func__, accept);
+#if (BLE_DISABLED == FALSE)
   if (pairing_cb.is_le_only) {
     if (pairing_cb.is_le_nc) {
       BTA_DmBleConfirmReply((uint8_t*)bd_addr->address, accept);
@@ -2446,6 +2510,9 @@ bt_status_t btif_dm_ssp_reply(const bt_bdaddr_t* bd_addr,
   } else {
     BTA_DmConfirm((uint8_t*)bd_addr->address, accept);
   }
+#else
+  BTA_DmConfirm((uint8_t*)bd_addr->address, accept);
+#endif
   return BT_STATUS_SUCCESS;
 }
 
@@ -2529,10 +2596,10 @@ bt_status_t btif_dm_get_remote_services_by_transport(bt_bdaddr_t* remote_addr,
   mask_ext.num_uuid = 0;
   mask_ext.p_uuid = NULL;
   mask_ext.srvc_mask = BTA_ALL_SERVICE_MASK;
-
+#if (BLE_DISABLED == FALSE)
   BTA_DmDiscoverByTransport(remote_addr->address, &mask_ext,
                             bte_dm_search_services_evt, true, transport);
-
+#endif
   return BT_STATUS_SUCCESS;
 }
 
@@ -2744,7 +2811,7 @@ bool btif_dm_get_smp_config(tBTE_APPL_CFG* p_cfg) {
     BTIF_TRACE_DEBUG("%s: SMP options not found in configuration", __func__);
     return false;
   }
-
+#if (BLE_DISABLED == FALSE)
   char conf[64];
   const char* recv = stack_config_get_interface()->get_pts_smp_options();
   char* pch;
@@ -2782,7 +2849,7 @@ bool btif_dm_get_smp_config(tBTE_APPL_CFG* p_cfg) {
     p_cfg->ble_max_key_size = (uint8_t)strtoul(pch, &endptr, 16);
   else
     return false;
-
+#endif
   return true;
 }
 
@@ -2841,6 +2908,7 @@ bool btif_dm_proc_rmt_oob(BD_ADDR bd_addr, BT_OCTET16 p_c, BT_OCTET16 p_r) {
   return result;
 }
 #endif /*  BTIF_DM_OOB_TEST */
+#if (BLE_DISABLED == FALSE)
 
 static void btif_dm_ble_key_notif_evt(tBTA_DM_SP_KEY_NOTIF* p_ssp_key_notif) {
   bt_bdaddr_t bd_addr;
@@ -3246,6 +3314,7 @@ bt_status_t btif_le_test_mode(uint16_t opcode, uint8_t* buf, uint8_t len) {
   }
   return BT_STATUS_SUCCESS;
 }
+#endif
 
 void btif_dm_on_disable() {
   /* cancel any pending pairing requests */
@@ -3267,7 +3336,11 @@ void btif_dm_on_disable() {
  * Returns         void
  *
  ******************************************************************************/
-void btif_dm_read_energy_info() { BTA_DmBleGetEnergyInfo(bta_energy_info_cb); }
+void btif_dm_read_energy_info() {
+#if (BLE_DISABLED == FALSE)
+  BTA_DmBleGetEnergyInfo(bta_energy_info_cb);
+#endif
+}
 
 static char* btif_get_default_local_name() {
   if (btif_default_local_name[0] == '\0') {

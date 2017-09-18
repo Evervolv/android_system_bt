@@ -37,9 +37,12 @@
 #include "btm_api.h"
 #include "device/include/esco_parameters.h"
 
+#if (BLE_DISABLED == FALSE)
 #include "btm_ble_int.h"
-#include "btm_int_types.h"
 #include "smp_api.h"
+#endif
+
+#include "btm_int_types.h"
 
 extern tBTM_CB btm_cb;
 
@@ -171,6 +174,7 @@ extern void btm_dev_init(void);
 extern void btm_read_local_name_timeout(void* data);
 extern void btm_read_local_name_complete(uint8_t* p, uint16_t evt_len);
 
+#if (BLE_DISABLED == FALSE)
 extern void btm_ble_add_2_white_list_complete(uint8_t status);
 extern void btm_ble_remove_from_white_list_complete(uint8_t* p,
                                                     uint16_t evt_len);
@@ -180,6 +184,7 @@ extern tBTM_STATUS btm_ble_read_resolving_list_entry(
     tBTM_SEC_DEV_REC* p_dev_rec);
 extern bool btm_ble_resolving_list_load_dev(tBTM_SEC_DEV_REC* p_dev_rec);
 extern void btm_ble_resolving_list_remove_dev(tBTM_SEC_DEV_REC* p_dev_rec);
+#endif  /* BLE_DISABLED */
 
 /* Vendor Specific Command complete evt handler */
 extern void btm_vsc_complete(uint8_t* p, uint16_t cc_opcode, uint16_t evt_len,
@@ -248,7 +253,7 @@ extern void btm_sec_dev_rec_cback_event(tBTM_SEC_DEV_REC* p_dev_rec,
                                         uint8_t res, bool is_le_trasnport);
 extern void btm_sec_set_peer_sec_caps(tACL_CONN* p_acl_cb,
                                       tBTM_SEC_DEV_REC* p_dev_rec);
-
+#if (BLE_DISABLED == FALSE)
 extern void btm_sec_clear_ble_keys(tBTM_SEC_DEV_REC* p_dev_rec);
 extern bool btm_sec_is_a_bonded_dev(BD_ADDR bda);
 extern void btm_consolidate_dev(tBTM_SEC_DEV_REC* p_target_rec);
@@ -261,7 +266,7 @@ extern bool btm_ble_start_sec_check(BD_ADDR bd_addr, uint16_t psm,
                                     bool is_originator,
                                     tBTM_SEC_CALLBACK* p_callback,
                                     void* p_ref_data);
-
+#endif
 extern tINQ_DB_ENT* btm_inq_db_new(BD_ADDR p_bda);
 
 extern void btm_rem_oob_req(uint8_t* p);

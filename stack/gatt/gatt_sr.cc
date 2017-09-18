@@ -26,6 +26,7 @@
 #include "bt_utils.h"
 #include "osi/include/osi.h"
 
+#if (BLE_DISABLED == FALSE)
 #include <string.h>
 #include "gatt_int.h"
 #include "l2c_api.h"
@@ -1266,3 +1267,5 @@ void gatt_server_handle_client_req(tGATT_TCB* p_tcb, uint8_t op_code,
     }
   }
 }
+
+#endif /* BLE_DISABLED */

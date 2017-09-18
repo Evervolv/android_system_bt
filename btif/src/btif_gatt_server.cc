@@ -38,6 +38,8 @@
 #include "btif_common.h"
 #include "btif_util.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include "bt_common.h"
 #include "bta_api.h"
 #include "bta_closure_api.h"
@@ -469,3 +471,4 @@ const btgatt_server_interface_t btgattServerInterface = {
     btif_gatts_delete_service, btif_gatts_send_indication,
     btif_gatts_send_response,  btif_gattc_set_preferred_phy,
     btif_gattc_read_phy};
+#endif

@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 
 #include "bt_common.h"
@@ -208,3 +210,5 @@ bool bta_gatts_uuid_compare(tBT_UUID tar, tBT_UUID src) {
 
   return (memcmp(ps, pt, LEN_UUID_128) == 0);
 }
+
+#endif

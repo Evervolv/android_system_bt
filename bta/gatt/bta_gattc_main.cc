@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 
 #include "bt_common.h"
@@ -507,3 +509,4 @@ static char* gattc_state_code(tBTA_GATTC_STATE state_code) {
 }
 
 #endif /* Debug Functions */
+#endif /* BLE_DISABLED */

@@ -17,6 +17,8 @@
  ******************************************************************************/
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 #include "bt_utils.h"
 #include "btcore/include/uuid.h"
@@ -769,3 +771,6 @@ bool GAP_BleCancelReadPeerDevName(BD_ADDR peer_bda) {
 
   return (true);
 }
+
+#endif  /* BLE_DISABLED */
+

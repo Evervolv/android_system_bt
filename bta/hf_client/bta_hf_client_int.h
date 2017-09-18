@@ -18,6 +18,7 @@
  ******************************************************************************/
 
 #include "bta_api.h"
+#include "osi/include/alarm.h"
 #include "bta_hf_client_api.h"
 #include "bta_hf_client_at.h"
 #include "bta_sys.h"

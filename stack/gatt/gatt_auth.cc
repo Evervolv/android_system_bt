@@ -24,6 +24,7 @@
 #include "bt_target.h"
 #include "bt_utils.h"
 
+#if (BLE_DISABLED == FALSE)
 #include <string.h>
 #include "bt_common.h"
 
@@ -473,3 +474,6 @@ bool gatt_security_check_start(tGATT_CLCB* p_clcb) {
 
   return status;
 }
+
+
+#endif  /* BLE_DISABLED */

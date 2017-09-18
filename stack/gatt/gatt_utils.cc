@@ -25,6 +25,7 @@
 #include "bt_utils.h"
 #include "osi/include/osi.h"
 
+#if (BLE_DISABLED == FALSE)
 #include <string.h>
 #include "bt_common.h"
 #include "stdio.h"
@@ -2014,3 +2015,7 @@ tGATT_PENDING_ENC_CLCB* gatt_add_pending_enc_channel_clcb(tGATT_TCB* p_tcb,
 
   return p_buf;
 }
+
+#endif
+
+

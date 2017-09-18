@@ -28,6 +28,7 @@
 #include "bt_utils.h"
 #include "stack_config.h"
 
+#if (BLE_DISABLED == FALSE)
 #include "btm_int.h"
 #include "hcimsgs.h"
 #include "l2c_int.h"
@@ -574,3 +575,5 @@ bool SMP_CreateLocalSecureConnectionsOobData(tBLE_BD_ADDR* addr_to_send_to) {
 
   return true;
 }
+
+#endif /* BLE_DISABLED */

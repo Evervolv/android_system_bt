@@ -65,5 +65,7 @@ void GAP_Init(void) {
   gap_conn_init();
 #endif
 
+#if (BLE_DISABLED == FALSE)
   gap_attr_db_init();
+#endif
 }

@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 
 #include <base/bind.h>
@@ -747,3 +749,5 @@ void BTA_GATTC_Refresh(const BD_ADDR remote_bda) {
 
   bta_sys_sendmsg(p_buf);
 }
+
+#endif /* BLE_DISABLED */

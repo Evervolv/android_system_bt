@@ -33,7 +33,10 @@
 #include "btm_int.h"
 #include "btm_int_types.h"
 #include "hcidefs.h"
+
+#if (BLE_DISABLED == FALSE)
 #include "smp_api.h"
+#endif
 
 extern bool ble_evt_type_is_connectable(uint16_t evt_type);
 extern void btm_ble_refresh_raddr_timer_timeout(void* data);
@@ -76,6 +79,7 @@ extern tBTM_STATUS btm_ble_start_scan(void);
 extern void btm_ble_create_ll_conn_complete(uint8_t status);
 
 /* LE security function from btm_sec.cc */
+#if (BLE_DISABLED == FALSE)
 extern void btm_ble_link_sec_check(BD_ADDR bd_addr, tBTM_LE_AUTH_REQ auth_req,
                                    tBTM_BLE_SEC_REQ_ACT* p_sec_req_act);
 extern void btm_ble_ltk_request_reply(BD_ADDR bda, bool use_stk,
@@ -89,6 +93,7 @@ extern void btm_ble_ltk_request(uint16_t handle, uint8_t rand[8],
                                 uint16_t ediv);
 extern tBTM_STATUS btm_ble_start_encrypt(BD_ADDR bda, bool use_stk,
                                          BT_OCTET16 stk);
+#endif
 extern void btm_ble_link_encrypted(BD_ADDR bd_addr, uint8_t encr_enable);
 
 /* LE device management functions */

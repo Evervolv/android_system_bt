@@ -2430,12 +2430,12 @@ void bta_jv_l2cap_connect_le(tBTA_JV_MSG* p_data) {
   memcpy(&t->remote_addr, &cc->peer_bd_addr, sizeof(t->remote_addr));
   id = t->id;
   t->init_called = false;
-
+#if (BLE_DISABLED == FALSE)
   if (L2CA_ConnectFixedChnl(t->chan, t->remote_addr)) {
     evt.l2c_cl_init.status = BTA_JV_SUCCESS;
     evt.l2c_cl_init.handle = id;
   }
-
+#endif
   // it could have been deleted/moved from under us, so re-find it */
   t = fcclient_find_by_id(id);
   if (t) {

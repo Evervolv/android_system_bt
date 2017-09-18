@@ -95,6 +95,8 @@ typedef struct {
   tGAP_CCB ccb_pool[GAP_MAX_CONNECTIONS];
 } tGAP_CONN;
 
+
+#if (BLE_DISABLED == FALSE)
 #define GAP_MAX_CHAR_NUM 4
 
 typedef struct {
@@ -102,6 +104,7 @@ typedef struct {
   uint16_t uuid;
   tGAP_BLE_ATTR_VALUE attr_value;
 } tGAP_ATTR;
+#endif
 /**********************************************************************
  * M A I N   C O N T R O L   B L O C K
  **********************************************************************/
@@ -137,14 +140,19 @@ typedef struct {
 #endif
 
   /* LE GAP attribute database */
+#if (BLE_DISABLED == FALSE)
   tGAP_ATTR gatt_attr[GAP_MAX_CHAR_NUM];
   tGAP_CLCB clcb[GAP_MAX_CL]; /* connection link*/
   tGATT_IF gatt_if;
+#endif
 } tGAP_CB;
 
 extern tGAP_CB gap_cb;
 #if (GAP_CONN_INCLUDED == TRUE)
 extern void gap_conn_init(void);
 #endif
-extern void gap_attr_db_init(void);
+#if (BLE_DISABLED == FALSE)
+  extern void gap_attr_db_init(void);
+#endif
+
 #endif

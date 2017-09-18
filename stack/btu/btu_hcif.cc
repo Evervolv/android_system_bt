@@ -114,17 +114,21 @@ static void btu_hcif_enhanced_flush_complete_evt(void);
 static void btu_hcif_ssr_evt(uint8_t* p, uint16_t evt_len);
 #endif /* BTM_SSR_INCLUDED == TRUE */
 
+#if (BLE_DISABLED == FALSE)
 static void btu_ble_ll_conn_complete_evt(uint8_t* p, uint16_t evt_len);
 static void btu_ble_read_remote_feat_evt(uint8_t* p);
 static void btu_ble_ll_conn_param_upd_evt(uint8_t* p, uint16_t evt_len);
 static void btu_ble_proc_ltk_req(uint8_t* p);
 static void btu_hcif_encryption_key_refresh_cmpl_evt(uint8_t* p);
 static void btu_ble_data_length_change_evt(uint8_t* p, uint16_t evt_len);
+
 #if (BLE_LLT_INCLUDED == TRUE)
 static void btu_ble_rc_param_req_evt(uint8_t* p);
 #endif
 #if (BLE_PRIVACY_SPT == TRUE)
 static void btu_ble_proc_enhanced_conn_cmpl(uint8_t* p, uint16_t evt_len);
+#endif
+
 #endif
 
 /*******************************************************************************
@@ -140,7 +144,9 @@ static void btu_ble_proc_enhanced_conn_cmpl(uint8_t* p, uint16_t evt_len);
 void btu_hcif_process_event(UNUSED_ATTR uint8_t controller_id, BT_HDR* p_msg) {
   uint8_t* p = (uint8_t*)(p_msg + 1) + p_msg->offset;
   uint8_t hci_evt_code, hci_evt_len;
+#if (BLE_DISABLED == FALSE)
   uint8_t ble_sub_code;
+#endif
   STREAM_TO_UINT8(hci_evt_code, p);
   STREAM_TO_UINT8(hci_evt_len, p);
 
@@ -175,9 +181,11 @@ void btu_hcif_process_event(UNUSED_ATTR uint8_t controller_id, BT_HDR* p_msg) {
     case HCI_ENCRYPTION_CHANGE_EVT:
       btu_hcif_encryption_change_evt(p);
       break;
+#if (BLE_DISABLED == FALSE)
     case HCI_ENCRYPTION_KEY_REFRESH_COMP_EVT:
       btu_hcif_encryption_key_refresh_cmpl_evt(p);
       break;
+#endif
     case HCI_READ_RMT_FEATURES_COMP_EVT:
       btu_hcif_read_rmt_features_comp_evt(p);
       break;
@@ -293,13 +301,12 @@ void btu_hcif_process_event(UNUSED_ATTR uint8_t controller_id, BT_HDR* p_msg) {
       btu_hcif_enhanced_flush_complete_evt();
       break;
 #endif
-
+#if (BLE_DISABLED == FALSE)
     case HCI_BLE_EVENT: {
       STREAM_TO_UINT8(ble_sub_code, p);
 
       HCI_TRACE_EVENT("BLE HCI(id=%d) event = 0x%02x)", hci_evt_code,
                       ble_sub_code);
-
       uint8_t ble_evt_len = hci_evt_len - 1;
       switch (ble_sub_code) {
         case HCI_BLE_ADV_PKT_RPT_EVT: /* result of inquiry */
@@ -346,7 +353,7 @@ void btu_hcif_process_event(UNUSED_ATTR uint8_t controller_id, BT_HDR* p_msg) {
       }
       break;
     }
-
+#endif /* BLE_DISABLED */
     case HCI_VENDOR_SPECIFIC_EVT:
       btm_vendor_specific_evt(p, hci_evt_len);
       break;
@@ -374,8 +381,11 @@ void btu_hcif_send_cmd(UNUSED_ATTR uint8_t controller_id, BT_HDR* p_buf) {
 
   // Eww...horrible hackery here
   /* If command was a VSC, then extract command_complete callback */
-  if ((opcode & HCI_GRP_VENDOR_SPECIFIC) == HCI_GRP_VENDOR_SPECIFIC ||
-      (opcode == HCI_BLE_RAND) || (opcode == HCI_BLE_ENCRYPT)) {
+  if ((opcode & HCI_GRP_VENDOR_SPECIFIC) == HCI_GRP_VENDOR_SPECIFIC
+#if (BLE_DISABLED == FALSE)
+	|| (opcode == HCI_BLE_RAND) || (opcode == HCI_BLE_ENCRYPT)
+#endif
+  ) {
     vsc_callback = *((void**)(p_buf + 1));
   }
 
@@ -926,7 +936,7 @@ static void btu_hcif_hdl_command_complete(uint16_t opcode, uint8_t* p,
     case HCI_READ_INQ_TX_POWER_LEVEL:
       btm_read_inq_tx_power_complete(p);
       break;
-
+#if (BLE_DISABLED == FALSE)
     /* BLE Commands sComplete*/
     case HCI_BLE_ADD_WHITE_LIST:
       btm_ble_add_2_white_list_complete(*p);
@@ -985,6 +995,7 @@ static void btu_hcif_hdl_command_complete(uint16_t opcode, uint8_t* p,
     case HCI_BLE_SET_RAND_PRIV_ADDR_TIMOUT:
       break;
 #endif
+#endif /* (BLE_DISABLED == FALSE) */
     default:
       if ((opcode & HCI_GRP_VENDOR_SPECIFIC) == HCI_GRP_VENDOR_SPECIFIC)
         btm_vsc_complete(p, opcode, evt_len, (tBTM_CMPL_CB*)p_cplt_cback);
@@ -1138,10 +1149,11 @@ static void btu_hcif_hdl_command_status(uint16_t opcode, uint8_t status,
              * encryption failure. */
             btm_sec_encrypt_change(BTM_INVALID_HCI_HANDLE, status, false);
             break;
-
+#if (BLE_DISABLED == FALSE)
           case HCI_BLE_CREATE_LL_CONN:
             btm_ble_create_ll_conn_complete(status);
             break;
+#endif
 
 #if (BTM_SCO_INCLUDED == TRUE)
           case HCI_SETUP_ESCO_CONNECTION:
@@ -1646,6 +1658,7 @@ static void btu_hcif_enhanced_flush_complete_evt(void) {
 /**********************************************
  * BLE Events
  **********************************************/
+#if (BLE_DISABLED == FALSE)
 static void btu_hcif_encryption_key_refresh_cmpl_evt(uint8_t* p) {
   uint8_t status;
   uint8_t enc_enable = 0;
@@ -1704,7 +1717,9 @@ static void btu_ble_proc_ltk_req(uint8_t* p) {
   STREAM_TO_UINT16(handle, p);
   pp = p + 8;
   STREAM_TO_UINT16(ediv, pp);
+#if (BLE_DISABLED == FALSE)
   btm_ble_ltk_request(handle, p, ediv);
+#endif
   /* This is empty until an upper layer cares about returning event */
 }
 
@@ -1744,3 +1759,6 @@ static void btu_ble_rc_param_req_evt(uint8_t* p) {
                                       timeout);
 }
 #endif /* BLE_LLT_INCLUDED */
+
+#endif /* BLE_DISABLED */
+

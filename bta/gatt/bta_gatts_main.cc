@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 
 #include "bt_common.h"
@@ -113,3 +115,5 @@ bool bta_gatts_hdl_event(BT_HDR* p_msg) {
 
   return (true);
 }
+
+#endif /* BLE_DISABLED */

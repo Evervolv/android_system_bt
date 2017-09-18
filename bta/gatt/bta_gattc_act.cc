@@ -43,6 +43,8 @@
 #include "bta_hh_int.h"
 #endif
 
+#if (BLE_DISABLED == FALSE)
+
 /*****************************************************************************
  *  Constants
  ****************************************************************************/
@@ -1761,3 +1763,4 @@ static void bta_gattc_conn_update_cback(tGATT_IF gatt_if, uint16_t conn_id,
   cb_data.conn_update.status = status;
   (*p_clreg->p_cback)(BTA_GATTC_CONN_UPDATE_EVT, &cb_data);
 }
+#endif  // BLE_DISABLED == FALSE
