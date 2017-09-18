@@ -27,6 +27,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -1552,3 +1554,4 @@ void bta_gattc_cache_reset(const RawAddress& server_bda) {
   bta_gattc_generate_cache_file_name(fname, sizeof(fname), server_bda);
   unlink(fname);
 }
+#endif /* BLE_DISABLED */

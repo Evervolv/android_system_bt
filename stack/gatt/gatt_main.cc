@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include "bt_common.h"
 #include "bt_utils.h"
 #include "btif_storage.h"
@@ -1172,3 +1174,5 @@ tGATT_CH_STATE gatt_get_ch_state(tGATT_TCB* p_tcb) {
   }
   return ch_state;
 }
+
+#endif /* BLE_DISABLED */

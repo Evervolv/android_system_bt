@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 
 #include <base/bind.h>
@@ -732,3 +734,5 @@ void BTA_GATTC_Refresh(const RawAddress& remote_bda) {
   do_in_bta_thread(FROM_HERE,
                    base::Bind(&bta_gattc_process_api_refresh, remote_bda));
 }
+
+#endif /* BLE_DISABLED */

@@ -25,6 +25,8 @@
 #include "gap_api.h"
 #include "gatt_api.h"
 
+#if (BLE_DISABLED == FALSE)
+
 using base::StringPrintf;
 
 namespace {
@@ -579,3 +581,5 @@ bool GAP_BleCancelReadPeerDevName(const RawAddress& peer_bda) {
 
   return (true);
 }
+
+#endif  /* BLE_DISABLED */

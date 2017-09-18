@@ -324,6 +324,7 @@ extern uint16_t GAP_ConnGetL2CAPCid(uint16_t gap_handle);
  ******************************************************************************/
 extern void GAP_Init(void);
 
+#if (BLE_DISABLED == FALSE)
 /*******************************************************************************
  *
  * Function         GAP_BleAttrDBUpdate
@@ -383,5 +384,7 @@ extern bool GAP_BleReadPeerAddressResolutionCap(const RawAddress& peer_bda,
  *
  ******************************************************************************/
 extern bool GAP_BleCancelReadPeerDevName(const RawAddress& peer_bda);
+
+#endif
 
 #endif /* GAP_API_H */

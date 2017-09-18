@@ -25,6 +25,7 @@
 #include "srvc_battery_int.h"
 #include "srvc_eng_int.h"
 
+#if (BLE_DISABLED == FALSE)
 #define BA_MAX_CHAR_NUM 1
 
 /* max 3 descriptors, 1 desclration and 1 value */
@@ -361,3 +362,4 @@ bool Battery_ReadBatteryLevel(const RawAddress&) {
   /* to be implemented */
   return true;
 }
+#endif  /* BLE_DISABLED */

@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include "gatt_int.h"
 #include "l2c_api.h"
 
@@ -534,3 +536,4 @@ tGATT_STATUS attp_send_cl_msg(tGATT_TCB& tcb, tGATT_CLCB* p_clcb,
 
   return attp_cl_send_cmd(tcb, p_clcb, op_code, p_cmd);
 }
+#endif

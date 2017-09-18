@@ -24,6 +24,7 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
 #include <stdio.h>
 #include <string.h>
 
@@ -311,3 +312,6 @@ bool aes_cipher_msg_auth_code(BT_OCTET16 key, uint8_t* input, uint16_t length,
 
   return ret;
 }
+
+#endif
+

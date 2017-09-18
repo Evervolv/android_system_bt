@@ -28,7 +28,9 @@
 #include "bt_target.h"
 #include "bta_sys.h"
 
+#if (BLE_DISABLED == FALSE)
 #include "bta_gatt_api.h"
+#endif
 
 /*****************************************************************************
  *  Constants and data types
@@ -75,6 +77,7 @@ enum {
   BTA_DM_CI_IO_REQ_EVT,
   BTA_DM_CI_RMT_OOB_EVT,
 
+#if (BLE_DISABLED == FALSE)
   BTA_DM_API_ADD_BLEKEY_EVT,
   BTA_DM_API_ADD_BLEDEVICE_EVT,
   BTA_DM_API_BLE_PASSKEY_REPLY_EVT,
@@ -90,6 +93,8 @@ enum {
 #endif
   BTA_DM_API_SET_DATA_LENGTH_EVT,
   BTA_DM_API_BLE_ENERGY_INFO_EVT,
+
+#endif
 
   BTA_DM_API_ENABLE_TEST_MODE_EVT,
   BTA_DM_API_DISABLE_TEST_MODE_EVT,
@@ -150,8 +155,10 @@ typedef struct {
   tBTA_SERVICE_MASK services;
   tBTA_DM_SEARCH_CBACK* p_cback;
   tBTA_DM_RS_RES rs_res;
+#if (BLE_DISABLED == FALSE)
   uint8_t num_uuid;
   tBT_UUID* p_uuid;
+#endif
 } tBTA_DM_API_SEARCH;
 
 /* data type for BTA_DM_API_DISCOVER_EVT */
@@ -162,8 +169,10 @@ typedef struct {
   tBTA_DM_SEARCH_CBACK* p_cback;
   bool sdp_search;
   tBTA_TRANSPORT transport;
+#if (BLE_DISABLED == FALSE)
   uint8_t num_uuid;
   tBT_UUID* p_uuid;
+#endif
   tSDP_UUID uuid;
 } tBTA_DM_API_DISCOVER;
 
@@ -261,8 +270,10 @@ typedef struct {
   uint8_t new_role;
   RawAddress bd_addr;
   uint8_t hci_status;
+#if (BLE_DISABLED == FALSE)
   uint16_t handle;
   tBT_TRANSPORT transport;
+#endif
 } tBTA_DM_ACL_CHANGE;
 
 /* data type for BTA_DM_PM_BTM_STATUS_EVT */
@@ -322,6 +333,7 @@ typedef struct {
   RawAddress bd_addr;
 } tBTA_DM_API_SET_ENCRYPTION;
 
+#if (BLE_DISABLED == FALSE)
 typedef struct {
   BT_HDR hdr;
   RawAddress bd_addr;
@@ -418,6 +430,8 @@ typedef struct {
   tBTA_BLE_ENERGY_INFO_CBACK* p_energy_info_cback;
 } tBTA_DM_API_ENERGY_INFO;
 
+#endif /* BLE_DISABLED */
+
 /* data type for BTA_DM_API_REMOVE_ACL_EVT */
 typedef struct {
   BT_HDR hdr;
@@ -490,6 +504,7 @@ typedef union {
 
   tBTA_DM_API_SET_ENCRYPTION set_encryption;
 
+#if (BLE_DISABLED == FALSE)
   tBTA_DM_API_ADD_BLEKEY add_ble_key;
   tBTA_DM_API_ADD_BLE_DEVICE add_ble_device;
   tBTA_DM_API_PASSKEY_REPLY ble_passkey_reply;
@@ -503,6 +518,7 @@ typedef union {
   tBTA_DM_API_BLE_SET_DATA_LENGTH ble_set_data_length;
 
   tBTA_DM_API_ENERGY_INFO ble_energy_info;
+#endif
 
   tBTA_DM_API_REMOVE_ACL remove_acl;
   tBTA_DM_API_REMOVE_ALL_ACL remove_all_acl;
@@ -548,8 +564,10 @@ typedef struct {
   tBTA_DM_PM_ACTION pm_mode_attempted;
   tBTA_DM_PM_ACTION pm_mode_failed;
   bool remove_dev_pending;
+#if (BLE_DISABLED == FALSE)
   uint16_t conn_handle;
   tBT_TRANSPORT transport;
+#endif
 } tBTA_DM_PEER_DEVICE;
 
 /* structure to store list of
@@ -557,7 +575,9 @@ typedef struct {
 typedef struct {
   tBTA_DM_PEER_DEVICE peer_device[BTA_DM_NUM_PEER_DEVICE];
   uint8_t count;
+#if (BLE_DISABLED == FALSE)
   uint8_t le_count;
+#endif
 } tBTA_DM_ACTIVE_LINK;
 
 typedef struct {
@@ -607,7 +627,9 @@ typedef struct {
   bool is_bta_dm_active;
   tBTA_DM_ACTIVE_LINK device_list;
   tBTA_DM_SEC_CBACK* p_sec_cback;
+#if (BLE_DISABLED == FALSE)
   tBTA_BLE_ENERGY_INFO_CBACK* p_energy_info_cback;
+#endif
   uint16_t state;
   bool disabling;
   alarm_t* disable_timer;
@@ -674,6 +696,7 @@ typedef struct {
   bool sdp_search;
   bool cancel_pending; /* inquiry cancel is pending */
   tBTA_TRANSPORT transport;
+#if (BLE_DISABLED == FALSE)
   tBTA_DM_SEARCH_CBACK* p_scan_cback;
   tBTA_GATTC_IF client_if;
   uint8_t num_uuid;
@@ -686,7 +709,7 @@ typedef struct {
   uint32_t ble_raw_used;
   alarm_t* gatt_close_timer; /* GATT channel close delay timer */
   RawAddress pending_close_bda; /* pending GATT channel remote device address */
-
+#endif
 } tBTA_DM_SEARCH_CB;
 
 /* DI control block */
@@ -811,6 +834,7 @@ extern void bta_dm_pm_btm_status(tBTA_DM_MSG* p_data);
 extern void bta_dm_pm_timer(tBTA_DM_MSG* p_data);
 extern void bta_dm_add_ampkey(tBTA_DM_MSG* p_data);
 
+#if (BLE_DISABLED == FALSE)
 extern void bta_dm_add_blekey(tBTA_DM_MSG* p_data);
 extern void bta_dm_add_ble_device(tBTA_DM_MSG* p_data);
 extern void bta_dm_ble_passkey_reply(tBTA_DM_MSG* p_data);
@@ -831,6 +855,7 @@ extern void bta_dm_ble_set_data_length(tBTA_DM_MSG* p_data);
 
 extern void bta_dm_ble_get_energy_info(tBTA_DM_MSG* p_data);
 
+#endif
 extern void bta_dm_set_encryption(tBTA_DM_MSG* p_data);
 extern void bta_dm_confirm(tBTA_DM_MSG* p_data);
 extern void bta_dm_loc_oob(tBTA_DM_MSG* p_data);

@@ -31,6 +31,8 @@
 #include "btif_common.h"
 #include "btif_util.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <hardware/bt_gatt.h>
 
 #include "advertise_data_parser.h"
@@ -443,3 +445,5 @@ BleScannerInterface* get_ble_scanner_instance() {
 
   return btLeScannerInstance;
 }
+
+#endif

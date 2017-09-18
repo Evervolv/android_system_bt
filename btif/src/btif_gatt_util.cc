@@ -40,6 +40,8 @@
 #include "btif_util.h"
 #include "osi/include/osi.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #define GATTC_READ_VALUE_TYPE_VALUE 0x0000 /* Attribute value itself */
 #define GATTC_READ_VALUE_TYPE_AGG_FORMAT \
   0x2905 /* Characteristic Aggregate Format*/
@@ -243,6 +245,8 @@ void btif_gatt_check_encrypted_link(UNUSED_ATTR RawAddress bd_addr,
                                     UNUSED_ATTR tBTA_GATT_TRANSPORT
                                         transport_link) {}
 #endif
+
+#endif  // BLE_DISABLED
 
 void btif_gatt_move_track_adv_data(btgatt_track_adv_info_t* p_dest,
                                    btgatt_track_adv_info_t* p_src) {

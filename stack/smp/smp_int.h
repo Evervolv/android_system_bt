@@ -24,6 +24,7 @@
 #ifndef SMP_INT_H
 #define SMP_INT_H
 
+#if (BLE_DISABLED == FALSE)
 #include "btm_api.h"
 #include "btm_ble_api.h"
 #include "btu.h"
@@ -541,5 +542,7 @@ extern bool aes_cipher_msg_auth_code(BT_OCTET16 key, uint8_t* input,
                                      uint16_t length, uint16_t tlen,
                                      uint8_t* p_signature);
 extern void print128(BT_OCTET16 x, const uint8_t* key_name);
+
+#endif
 
 #endif /* SMP_INT_H */

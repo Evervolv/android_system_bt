@@ -26,15 +26,18 @@
 #include "btm_int.h"
 #include "btu.h"
 #include "device/include/controller.h"
-#include "gatt_api.h"
-#include "gatt_int.h"
 #include "l2c_int.h"
 #include "osi/include/alarm.h"
 #include "osi/include/fixed_queue.h"
 #include "osi/include/log.h"
 #include "osi/include/thread.h"
 #include "sdpint.h"
+
+#if (BLE_DISABLED == FALSE)
+#include "gatt_api.h"
+#include "gatt_int.h"
 #include "smp_int.h"
+#endif
 
 // RT priority for audio-related tasks
 #define BTU_TASK_RT_PRIORITY 1
@@ -67,12 +70,13 @@ void btu_init_core(void) {
   l2c_init();
 
   sdp_init();
-
+#if (BLE_DISABLED == FALSE)
   gatt_init();
 
   SMP_Init();
 
   btm_ble_init();
+#endif
 }
 
 /*****************************************************************************
@@ -88,8 +92,9 @@ void btu_init_core(void) {
 void btu_free_core(void) {
   /* Free the mandatory core stack components */
   l2c_free();
-
+#if (BLE_DISABLED == FALSE)
   gatt_free();
+#endif
 }
 
 /*****************************************************************************

@@ -19,6 +19,7 @@
 #include <string.h>
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
 #include "bt_types.h"
 #include "bt_utils.h"
 #include "btm_ble_api.h"
@@ -97,3 +98,6 @@ tBTM_STATUS BTM_BleGetEnergyInfo(tBTM_BLE_ENERGY_INFO_CBACK* p_ener_cback) {
                             btm_ble_cont_energy_cmpl_cback);
   return BTM_CMD_STARTED;
 }
+
+#endif
+

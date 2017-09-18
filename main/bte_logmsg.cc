@@ -59,7 +59,9 @@
 #include "hidd_api.h"
 #endif
 
+#if (BLE_DISABLED == FALSE)
 #include "smp_api.h"
+#endif
 
 #ifndef DEFAULT_CONF_TRACE_LEVEL
 #define DEFAULT_CONF_TRACE_LEVEL BT_TRACE_LEVEL_WARNING
@@ -127,8 +129,10 @@ static tBTTRC_FUNC_MAP bttrc_set_level_map[] = {
 #endif
     {BTTRC_ID_STK_SDP, BTTRC_ID_STK_SDP, SDP_SetTraceLevel, "TRC_SDP",
      DEFAULT_CONF_TRACE_LEVEL},
+#if (BLE_DISABLED == FALSE)
     {BTTRC_ID_STK_SMP, BTTRC_ID_STK_SMP, SMP_SetTraceLevel, "TRC_SMP",
      DEFAULT_CONF_TRACE_LEVEL},
+#endif
 #if (HID_DEV_INCLUDED == TRUE)
     {BTTRC_ID_STK_HIDD, BTTRC_ID_STK_HIDD, HID_DevSetTraceLevel, "TRC_HID_DEV",
      DEFAULT_CONF_TRACE_LEVEL},

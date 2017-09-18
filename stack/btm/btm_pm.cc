@@ -397,8 +397,11 @@ static int btm_pm_find_acl_ind(const RawAddress& remote_bda) {
   uint8_t xx;
 
   for (xx = 0; xx < MAX_L2CAP_LINKS; xx++, p++) {
-    if (p->in_use && p->remote_addr == remote_bda &&
-        p->transport == BT_TRANSPORT_BR_EDR) {
+    if (p->in_use && p->remote_addr == remote_bda
+#if (BLE_DISABLED == FALSE)
+    	&& p->transport == BT_TRANSPORT_BR_EDR
+#endif
+    ) {
 #if (BTM_PM_DEBUG == TRUE)
       BTM_TRACE_DEBUG("btm_pm_find_acl_ind ind:%d, st:%d", xx,
                       btm_cb.pm_mode_db[xx].state);
@@ -878,11 +881,13 @@ bool btm_pm_device_in_active_or_sniff_mode(void) {
     return true;
   }
 
+#if (BLE_DISABLED == FALSE)
   /* Check BLE states */
   if (btm_ble_get_conn_st() != BLE_CONN_IDLE) {
     BTM_TRACE_DEBUG("%s - BLE state: %x", __func__, btm_ble_get_conn_st());
     return true;
   }
+#endif
 
   return false;
 }

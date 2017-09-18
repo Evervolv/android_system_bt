@@ -397,9 +397,10 @@ extern void bta_gattc_send_open_cback(tBTA_GATTC_RCB* p_clreg,
                                       tBTA_TRANSPORT transport, uint16_t mtu);
 extern void bta_gattc_process_api_refresh(const RawAddress& remote_bda);
 extern void bta_gattc_cfg_mtu(tBTA_GATTC_CLCB* p_clcb, tBTA_GATTC_DATA* p_data);
+#if (BLE_DISABLED == FALSE)
 extern void bta_gattc_listen(tBTA_GATTC_DATA* p_msg);
 extern void bta_gattc_broadcast(tBTA_GATTC_DATA* p_msg);
-
+#endif
 /* utility functions */
 extern tBTA_GATTC_CLCB* bta_gattc_find_clcb_by_cif(uint8_t client_if,
                                                    const RawAddress& remote_bda,

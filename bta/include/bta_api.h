@@ -30,7 +30,10 @@
 #include "bt_target.h"
 #include "bt_types.h"
 #include "btm_api.h"
+
+#if (BLE_DISABLED == FALSE)
 #include "btm_ble_api.h"
+#endif
 
 /*****************************************************************************
  *  Constants and data types
@@ -89,10 +92,15 @@ typedef uint8_t tBTA_STATUS;
 #define BTA_SDP_SERVICE_ID 29        /* SDP Search */
 #define BTA_HIDD_SERVICE_ID 30       /* HID Device */
 
+#if (BLE_DISABLED == FALSE)
 /* BLE profile service ID */
 #define BTA_BLE_SERVICE_ID 31  /* GATT profile */
 #define BTA_USER_SERVICE_ID 32 /* User requested UUID */
 #define BTA_MAX_SERVICE_ID 33
+#else
+#define BTA_USER_SERVICE_ID 31 /* User requested UUID */
+#define BTA_MAX_SERVICE_ID 32
+#endif
 
 /* service IDs (BTM_SEC_SERVICE_FIRST_EMPTY + 1) to (BTM_SEC_MAX_SERVICES - 1)
  * are used by BTA JV */
@@ -133,9 +141,14 @@ typedef uint8_t tBTA_SERVICE_ID;
 #define BTA_PCE_SERVICE_MASK 0x10000000    /* Phone Book Client */
 #define BTA_HIDD_SERVICE_MASK 0x20000000   /* HID Device */
 
+#if (BLE_DISABLED == FALSE)
 #define BTA_BLE_SERVICE_MASK 0x40000000  /* GATT based service */
-#define BTA_ALL_SERVICE_MASK 0x7FFFFFFF  /* All services supported by BTA. */
+#define BTA_ALL_SERVICE_MASK 0x7FFFFFFF /* All services supported by BTA. */
 #define BTA_USER_SERVICE_MASK 0x80000000 /* Message Notification Profile */
+#else
+#define BTA_USER_SERVICE_MASK 0x40000000 /* Message Notification Profile */
+#define BTA_ALL_SERVICE_MASK 0x1FFFFFFF /* All services supported by BTA. */
+#endif
 
 typedef uint32_t tBTA_SERVICE_MASK;
 
@@ -181,12 +194,14 @@ typedef uint16_t tBTA_SEC;
 #define BTA_DM_GENERAL_DISC                         \
   BTM_GENERAL_DISCOVERABLE /* General discoverable. \
                               */
+#if (BLE_DISABLED == FALSE)
 #define BTA_DM_BLE_NON_DISCOVERABLE \
   BTM_BLE_NON_DISCOVERABLE /* Device is not LE discoverable */
 #define BTA_DM_BLE_GENERAL_DISCOVERABLE \
   BTM_BLE_GENERAL_DISCOVERABLE /* Device is LE General discoverable */
 #define BTA_DM_BLE_LIMITED_DISCOVERABLE \
   BTM_BLE_LIMITED_DISCOVERABLE /* Device is LE Limited discoverable */
+#endif
 typedef uint16_t
     tBTA_DM_DISC; /* this discoverability mode is a bit mask among BR mode and
                      LE mode */
@@ -194,10 +209,12 @@ typedef uint16_t
 /* Connectable Modes */
 #define BTA_DM_NON_CONN BTM_NON_CONNECTABLE /* Device is not connectable. */
 #define BTA_DM_CONN BTM_CONNECTABLE         /* Device is connectable. */
+#if (BLE_DISABLED == FALSE)
 #define BTA_DM_BLE_NON_CONNECTABLE \
   BTM_BLE_NON_CONNECTABLE /* Device is LE non-connectable. */
 #define BTA_DM_BLE_CONNECTABLE \
   BTM_BLE_CONNECTABLE /* Device is LE connectable. */
+#endif
 
 typedef uint16_t tBTA_DM_CONN;
 
@@ -221,11 +238,13 @@ typedef tBT_TRANSPORT tBTA_TRANSPORT;
 #define BTA_DM_LIMITED_INQUIRY \
   BTM_LIMITED_INQUIRY /* Perform limited inquiry. */
 
+#if (BLE_DISABLED == FALSE)
 #define BTA_BLE_INQUIRY_NONE BTM_BLE_INQUIRY_NONE
 #define BTA_BLE_GENERAL_INQUIRY \
   BTM_BLE_GENERAL_INQUIRY /* Perform LE general inquiry. */
 #define BTA_BLE_LIMITED_INQUIRY \
   BTM_BLE_LIMITED_INQUIRY /* Perform LE limited inquiry. */
+#endif
 typedef uint8_t tBTA_DM_INQ_MODE;
 
 /* Inquiry Filter Type */
@@ -316,6 +335,8 @@ typedef struct {
   uint8_t* bta_dm_eir_additional;      /* additional data */
 } tBTA_DM_EIR_CONF;
 
+#if (BLE_DISABLED == FALSE)
+
 /* advertising filter policy */
 typedef tBTM_BLE_AFP tBTA_BLE_AFP;
 
@@ -331,6 +352,7 @@ typedef uint8_t tBTA_BLE_DISCARD_RULE;
 
 enum { BTA_BLE_ADV_SEEN_FIRST_TIME = 0, BTA_BLE_ADV_TRACKING_TIMEOUT = 1 };
 typedef uint8_t tBTA_BLE_ADV_CHANGE_REASON;
+#endif
 
 /* BLE customer specific feature function type definitions */
 /* data type used on customer specific feature for RSSI monitoring */
@@ -535,7 +557,9 @@ typedef struct {
 /* Structure associated with BTA_DM_LINK_UP_EVT */
 typedef struct {
   RawAddress bd_addr; /* BD address peer device. */
+#if (BLE_DISABLED == FALSE)
   tBTA_TRANSPORT link_type;
+#endif
 } tBTA_DM_LINK_UP;
 
 /* Structure associated with BTA_DM_LINK_DOWN_EVT */
@@ -543,7 +567,9 @@ typedef struct {
   RawAddress bd_addr; /* BD address peer device. */
   uint8_t status;  /* connection open/closed */
   bool is_removed; /* true if device is removed when link is down */
+#if (BLE_DISABLED == FALSE)
   tBTA_TRANSPORT link_type;
+#endif
 } tBTA_DM_LINK_DOWN;
 
 /* Structure associated with BTA_DM_ROLE_CHG_EVT */
@@ -563,7 +589,9 @@ typedef struct {
 #define BTA_IO_CAP_IO BTM_IO_CAP_IO         /* 1 DisplayYesNo */
 #define BTA_IO_CAP_IN BTM_IO_CAP_IN         /* 2 KeyboardOnly */
 #define BTA_IO_CAP_NONE BTM_IO_CAP_NONE     /* 3 NoInputNoOutput */
+#if (BLE_DISABLED == FALSE)
 #define BTA_IO_CAP_KBDISP BTM_IO_CAP_KBDISP /* 4 Keyboard display */
+#endif
 typedef tBTM_IO_CAP tBTA_IO_CAP;
 
 #define BTA_AUTH_SP_NO                                      \
@@ -729,6 +757,7 @@ typedef struct {
   int8_t rssi;     /* The rssi value */
   uint8_t* p_eir;  /* received EIR */
   uint16_t eir_len; /* received EIR length */
+#if (BLE_DISABLED == FALSE)
   uint8_t inq_result_type;
   uint8_t ble_addr_type;
   uint16_t ble_evt_type;
@@ -739,6 +768,8 @@ typedef struct {
   uint16_t ble_periodic_adv_int;
   tBT_DEVICE_TYPE device_type;
   uint8_t flag;
+#endif
+
 } tBTA_DM_INQ_RES;
 
 /* Structure associated with BTA_DM_INQ_CMPL_EVT */
@@ -802,6 +833,7 @@ typedef void(tBTA_DM_ENCRYPT_CBACK)(const RawAddress& bd_addr,
 #define BTA_DM_BLE_SEC_MITM BTM_BLE_SEC_ENCRYPT_MITM
 typedef tBTM_BLE_SEC_ACT tBTA_DM_BLE_SEC_ACT;
 
+#if (BLE_DISABLED == FALSE)
 typedef tBTM_BLE_TX_TIME_MS tBTA_DM_BLE_TX_TIME_MS;
 typedef tBTM_BLE_RX_TIME_MS tBTA_DM_BLE_RX_TIME_MS;
 typedef tBTM_BLE_IDLE_TIME_MS tBTA_DM_BLE_IDLE_TIME_MS;
@@ -829,6 +861,10 @@ typedef void(tBTA_BLE_ENERGY_INFO_CBACK)(tBTA_DM_BLE_TX_TIME_MS tx_time,
                                          tBTA_DM_BLE_ENERGY_USED energy_used,
                                          tBTA_DM_CONTRL_STATE ctrl_state,
                                          tBTA_STATUS status);
+
+#else
+typedef uint8_t tBTA_DM_BLE_SEC_ACT;
+#endif
 
 /* Maximum service name length */
 #define BTA_SERVICE_NAME_LEN 35
@@ -1416,6 +1452,7 @@ extern void BTA_DmPcmInitSamples(uint32_t src_sps, uint32_t bits,
 extern int32_t BTA_DmPcmResample(void* p_src, uint32_t in_bytes, void* p_dst);
 #endif
 
+#if (BLE_DISABLED == FALSE)
 /* BLE related API functions */
 /*******************************************************************************
  *
@@ -1754,5 +1791,7 @@ extern void BTA_VendorInit(void);
  *
  ******************************************************************************/
 extern void BTA_VendorCleanup(void);
+
+#endif
 
 #endif /* BTA_API_H */

@@ -24,6 +24,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 
 #include "bt_common.h"
@@ -341,3 +343,5 @@ void BTA_GATTS_Close(uint16_t conn_id) {
 
   bta_sys_sendmsg(p_buf);
 }
+
+#endif /* BLE_DISABLED */

@@ -33,6 +33,7 @@
 
 using base::StringPrintf;
 
+#if (BLE_DISABLED == FALSE)
 #define GATTP_MAX_NUM_INC_SVR 0
 #define GATTP_MAX_CHAR_NUM 2
 #define GATTP_MAX_ATTR_NUM (GATTP_MAX_CHAR_NUM * 2 + GATTP_MAX_NUM_INC_SVR + 1)
@@ -461,3 +462,5 @@ void GATT_ConfigServiceChangeCCC(const RawAddress& remote_bda, bool enable,
   p_clcb->ccc_stage++;
   gatt_cl_start_config_ccc(p_clcb);
 }
+
+#endif  /* BLE_DISABLED */

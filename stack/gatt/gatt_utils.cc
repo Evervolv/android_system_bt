@@ -25,6 +25,7 @@
 #include "bt_utils.h"
 #include "osi/include/osi.h"
 
+#if (BLE_DISABLED == FALSE)
 #include <string.h>
 #include "bt_common.h"
 #include "stdio.h"
@@ -1632,3 +1633,5 @@ bool gatt_update_auto_connect_dev(tGATT_IF gatt_if, bool add,
   }
   return ret;
 }
+
+#endif

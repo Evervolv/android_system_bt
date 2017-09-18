@@ -44,6 +44,8 @@
 #include "bta_hh_int.h"
 #endif
 
+#if (BLE_DISABLED == FALSE)
+
 /*****************************************************************************
  *  Constants
  ****************************************************************************/
@@ -249,7 +251,9 @@ void bta_gattc_deregister(tBTA_GATTC_RCB* p_clreg) {
       bta_gattc_deregister_cmpl(p_clreg);
   } else {
     APPL_TRACE_ERROR("%s: Deregister Failed unknown client cif", __func__);
+#if (BTA_HH_LE_INCLUDED == TRUE)
     bta_hh_cleanup_disable(BTA_HH_OK);
+#endif
   }
 }
 /*******************************************************************************
@@ -1726,3 +1730,4 @@ static void bta_gattc_conn_update_cback(tGATT_IF gatt_if, uint16_t conn_id,
   cb_data.conn_update.status = status;
   (*p_clreg->p_cback)(BTA_GATTC_CONN_UPDATE_EVT, &cb_data);
 }
+#endif  // BLE_DISABLED == FALSE

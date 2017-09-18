@@ -32,6 +32,7 @@
 #include "gap_api.h"
 #include "hcimsgs.h"
 
+#if (BLE_DISABLED == FALSE)
 #include "btm_ble_int.h"
 #include "smp_api.h"
 
@@ -505,3 +506,5 @@ void btm_ble_refresh_local_resolvable_private_addr(
   }
 #endif
 }
+#endif
+

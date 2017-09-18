@@ -64,17 +64,17 @@ bool BTM_SecAddDevice(const RawAddress& bd_addr, DEV_CLASS dev_class,
                       uint8_t key_type, tBTM_IO_CAP io_cap,
                       uint8_t pin_length) {
   BTM_TRACE_API("%s: link key type:%x", __func__, key_type);
-
   tBTM_SEC_DEV_REC* p_dev_rec = btm_find_dev(bd_addr);
   if (!p_dev_rec) {
     p_dev_rec = btm_sec_allocate_dev_rec();
 
     p_dev_rec->bd_addr = bd_addr;
     p_dev_rec->hci_handle = BTM_GetHCIConnHandle(bd_addr, BT_TRANSPORT_BR_EDR);
-
+#if (BLE_DISABLED == FALSE)
     /* use default value for background connection params */
     /* update conn params, use default value for background connection params */
     memset(&p_dev_rec->conn_params, 0xff, sizeof(tBTM_LE_CONN_PRAMS));
+#endif
   } else {
     /* "Bump" timestamp for existing record */
     p_dev_rec->timestamp = btm_cb.dev_rec_count++;
@@ -228,24 +228,27 @@ tBTM_SEC_DEV_REC* btm_sec_alloc_dev(const RawAddress& bd_addr) {
   BTM_TRACE_EVENT("btm_sec_alloc_dev");
 
   tBTM_SEC_DEV_REC* p_dev_rec = btm_sec_allocate_dev_rec();
-
   /* Check with the BT manager if details about remote device are known */
   /* outgoing connection */
   p_inq_info = BTM_InqDbRead(bd_addr);
   if (p_inq_info != NULL) {
     memcpy(p_dev_rec->dev_class, p_inq_info->results.dev_class, DEV_CLASS_LEN);
-
+#if (BLE_DISABLED == FALSE)
     p_dev_rec->device_type = p_inq_info->results.device_type;
     p_dev_rec->ble.ble_addr_type = p_inq_info->results.ble_addr_type;
+#endif
   } else if (bd_addr == btm_cb.connecting_bda)
     memcpy(p_dev_rec->dev_class, btm_cb.connecting_dc, DEV_CLASS_LEN);
-
+#if (BLE_DISABLED == FALSE)
   /* update conn params, use default value for background connection params */
   memset(&p_dev_rec->conn_params, 0xff, sizeof(tBTM_LE_CONN_PRAMS));
+#endif
 
   p_dev_rec->bd_addr = bd_addr;
 
+#if (BLE_DISABLED == FALSE)
   p_dev_rec->ble_hci_handle = BTM_GetHCIConnHandle(bd_addr, BT_TRANSPORT_LE);
+#endif
   p_dev_rec->hci_handle = BTM_GetHCIConnHandle(bd_addr, BT_TRANSPORT_BR_EDR);
 
   return (p_dev_rec);
@@ -259,8 +262,10 @@ tBTM_SEC_DEV_REC* btm_sec_alloc_dev(const RawAddress& bd_addr) {
  *
  ******************************************************************************/
 void btm_sec_free_dev(tBTM_SEC_DEV_REC* p_dev_rec) {
+#if (BLE_DISABLED == FALSE)
   /* Clear out any saved BLE keys */
   btm_sec_clear_ble_keys(p_dev_rec);
+#endif
   list_remove(btm_cb.sec_dev_rec, p_dev_rec);
 }
 
@@ -316,8 +321,12 @@ bool is_handle_equal(void* data, void* context) {
   tBTM_SEC_DEV_REC* p_dev_rec = static_cast<tBTM_SEC_DEV_REC*>(data);
   uint16_t* handle = static_cast<uint16_t*>(context);
 
-  if (p_dev_rec->hci_handle == *handle || p_dev_rec->ble_hci_handle == *handle)
-    return false;
+    if (p_dev_rec->hci_handle == *handle
+#if (BLE_DISABLED == FALSE)
+     || p_dev_rec->ble_hci_handle == *handle
+#endif
+     )
+        return false;
 
   return true;
 }
@@ -340,6 +349,7 @@ tBTM_SEC_DEV_REC* btm_find_dev_by_handle(uint16_t handle) {
 }
 
 bool is_address_equal(void* data, void* context) {
+#if (BLE_DISABLED == FALSE)
   tBTM_SEC_DEV_REC* p_dev_rec = static_cast<tBTM_SEC_DEV_REC*>(data);
   const RawAddress* bd_addr = ((RawAddress*)context);
 
@@ -348,6 +358,7 @@ bool is_address_equal(void* data, void* context) {
   if (p_dev_rec->ble.pseudo_addr == *bd_addr) return false;
 
   if (btm_ble_addr_resolvable(*bd_addr, p_dev_rec)) return false;
+#endif
   return true;
 }
 
@@ -379,6 +390,7 @@ tBTM_SEC_DEV_REC* btm_find_dev(const RawAddress& bd_addr) {
  *
  ******************************************************************************/
 void btm_consolidate_dev(tBTM_SEC_DEV_REC* p_target_rec) {
+#if (BLE_DISABLED == FALSE)
   tBTM_SEC_DEV_REC temp_rec = *p_target_rec;
 
   BTM_TRACE_DEBUG("%s", __func__);
@@ -423,6 +435,7 @@ void btm_consolidate_dev(tBTM_SEC_DEV_REC* p_target_rec) {
       }
     }
   }
+#endif
 }
 
 /*******************************************************************************

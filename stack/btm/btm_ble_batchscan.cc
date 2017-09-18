@@ -30,6 +30,7 @@
 #include "device/include/controller.h"
 #include "hcimsgs.h"
 
+#if (BLE_DISABLED == FALSE)
 using base::Bind;
 using base::Callback;
 using hci_cmd_cb = base::Callback<void(uint8_t* /* return_parameters */,
@@ -550,3 +551,4 @@ void btm_ble_batchscan_cleanup(void) {
   memset(&ble_batchscan_cb, 0, sizeof(tBTM_BLE_BATCH_SCAN_CB));
   memset(&ble_advtrack_cb, 0, sizeof(tBTM_BLE_ADV_TRACK_CB));
 }
+#endif

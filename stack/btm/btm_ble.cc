@@ -28,6 +28,8 @@
 #include "bt_target.h"
 
 #include <base/bind.h>
+#if (BLE_DISABLED == FALSE)
+
 #include <string.h>
 
 #include "bt_types.h"
@@ -150,7 +152,6 @@ bool BTM_SecAddBleKey(const RawAddress& bd_addr, tBTM_LE_KEY_VALUE* p_le_key,
   if (key_type == BTM_LE_KEY_PID || key_type == BTM_LE_KEY_LID)
     btm_ble_resolving_list_load_dev(p_dev_rec);
 #endif
-
   return (true);
 }
 
@@ -2249,7 +2250,6 @@ bool BTM_GetLeSecurityState(const RawAddress& bd_addr,
                             uint8_t* p_le_key_size) {
   tBTM_SEC_DEV_REC* p_dev_rec;
   uint16_t dev_rec_sec_flags;
-
   *p_le_dev_sec_flags = 0;
   *p_le_key_size = 0;
 
@@ -2602,3 +2602,5 @@ void btm_ble_set_keep_rfu_in_auth_req(bool keep_rfu) {
 }
 
 #endif /* BTM_BLE_CONFORMANCE_TESTING */
+
+#endif /* BLE_DISABLED */

@@ -354,7 +354,9 @@ extern tBTA_HH_STATUS bta_hh_read_ssr_param(const RawAddress& bd_addr,
 
 /* functions for LE HID */
 extern void bta_hh_le_enable(void);
+#if (BTA_HH_LE_INCLUDED == TRUE)
 extern bool bta_hh_le_is_hh_gatt_if(tBTA_GATTC_IF client_if);
+#endif
 extern void bta_hh_le_deregister(void);
 extern bool bta_hh_is_le_device(tBTA_HH_DEV_CB* p_cb,
                                 const RawAddress& remote_bda);

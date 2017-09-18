@@ -23,7 +23,10 @@
  ******************************************************************************/
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include <base/strings/stringprintf.h>
+
 #include <stdio.h>
 #include <string.h>
 #include "bt_common.h"
@@ -1341,3 +1344,6 @@ bool GATT_GetConnIdIfConnected(tGATT_IF gatt_if, const RawAddress& bd_addr,
   VLOG(1) << __func__ << " status= " << +status;
   return status;
 }
+
+#endif
+

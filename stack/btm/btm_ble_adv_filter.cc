@@ -25,6 +25,8 @@
 
 #include "bt_target.h"
 
+#if (BLE_DISABLED == FALSE)
+
 #include "bt_types.h"
 #include "bt_utils.h"
 #include "btm_ble_api.h"
@@ -843,3 +845,5 @@ void btm_ble_adv_filter_init(void) {
 void btm_ble_adv_filter_cleanup(void) {
   osi_free_and_reset((void**)&btm_ble_adv_filt_cb.p_addr_filter_count);
 }
+
+#endif
