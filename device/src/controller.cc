@@ -173,10 +173,13 @@ static future_t* start_up(void) {
 
     page_number++;
   }
-
+#if (BLE_DISABLED == FALSE)
   // read BLE offload features support from controller
   response = AWAIT_COMMAND(packet_factory->make_ble_read_offload_features_support());
   packet_parser->parse_ble_read_offload_features_response(response, &ble_offload_features_supported);
+#else
+  ble_offload_features_supported = false;
+#endif
 #if (SC_MODE_INCLUDED == TRUE)
   if(ble_offload_features_supported) {
     secure_connections_supported =
