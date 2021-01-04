@@ -78,10 +78,13 @@
       "host" : true
     },
     {
+<<<<<<< HEAD
       "name" : "net_test_btif_rc",
       "host" : true
     },
     {
+=======
+>>>>>>> e0656b1410cfb848cd6b9169c05f1e328a8051d2
       "name" : "net_test_stack_a2dp_native",
       "host" : true
     }
